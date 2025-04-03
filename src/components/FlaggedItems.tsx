@@ -120,7 +120,7 @@ const FlaggedItems = () => {
           <CardContent>
             <div className="text-3xl font-bold">{flaggedData.length}</div>
             <p className="text-sm text-gray-400 mt-1">Total grants flagged for review</p>
-          </Card>
+          </CardContent>
         </Card>
         
         <Card className="bg-gray-900 border-gray-800">
@@ -134,7 +134,7 @@ const FlaggedItems = () => {
               {((flaggedData.length / grantsData.length) * 100).toFixed(1)}%
             </div>
             <p className="text-sm text-gray-400 mt-1">Percentage of total grants flagged</p>
-          </Card>
+          </CardContent>
         </Card>
         
         <Card className="bg-gray-900 border-gray-800">
@@ -148,7 +148,7 @@ const FlaggedItems = () => {
               {formatCurrency(flaggedData.reduce((sum, item) => sum + item.amount, 0))}
             </div>
             <p className="text-sm text-gray-400 mt-1">Total value of flagged grants</p>
-          </Card>
+          </CardContent>
         </Card>
       </div>
       
