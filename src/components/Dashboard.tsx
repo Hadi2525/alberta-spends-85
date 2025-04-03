@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { ministryTotals, yearlyTotals, keyMetrics, fiscalYears } from "@/data/grantsData";
 import { useToast } from "@/hooks/use-toast";
+import InfoTooltip from "@/components/ui/InfoTooltip";
 
 const Dashboard = () => {
   const [yearFilter, setYearFilter] = useState("ALL YEARS");
@@ -47,8 +48,16 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {keyMetrics.map((metric, index) => (
           <Card key={index} className="bg-gray-900 border-gray-800">
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 flex flex-row justify-between items-start">
               <CardTitle className="text-sm font-medium text-teal-400">{metric.title}</CardTitle>
+              <InfoTooltip 
+                content={
+                  <div>
+                    <p className="font-medium mb-1">About this metric:</p>
+                    <p>{metric.description || `Shows the ${metric.title.toLowerCase()} across all grants.`}</p>
+                  </div>
+                } 
+              />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gray-200">{metric.value}</div>
@@ -59,8 +68,17 @@ const Dashboard = () => {
       </div>
 
       {/* Total Grants Header with Improved Readability */}
-      <div className="text-xl font-bold border-b border-gray-800 pb-2 text-gray-100">
+      <div className="text-xl font-bold border-b border-gray-800 pb-2 text-gray-100 flex items-center">
         Total Grants: $417,260,276,160.40
+        <InfoTooltip 
+          className="ml-2"
+          content={
+            <div>
+              <p className="font-medium mb-1">Total Grants:</p>
+              <p>This represents the sum of all grant amounts across all ministries and fiscal years, providing a comprehensive overview of funding distribution.</p>
+            </div>
+          } 
+        />
         <p className="text-sm font-normal text-gray-400 mt-1">
           This total represents the sum of all grant amounts across all ministries and fiscal years, providing a comprehensive overview of funding distribution.
         </p>
@@ -71,8 +89,20 @@ const Dashboard = () => {
         {/* Ministry Distribution with Consolidated Other */}
         <Card className="bg-gray-900 border-gray-800">
           <CardHeader>
-            <div className="flex justify-between">
-              <CardTitle className="text-white">Ministry Funding Distribution</CardTitle>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <CardTitle className="text-white">Ministry Funding Distribution</CardTitle>
+                <InfoTooltip 
+                  className="ml-2"
+                  content={
+                    <div>
+                      <p className="font-medium mb-1">Ministry Funding Distribution:</p>
+                      <p>This pie chart shows how funding is distributed across different ministries. Small ministries (less than 2% of total funding) are grouped as "Other Ministries" for clarity.</p>
+                      <p className="mt-1">Use the year filter to view distribution for specific fiscal years.</p>
+                    </div>
+                  }
+                />
+              </div>
               <Select value={yearFilter} onValueChange={setYearFilter}>
                 <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-gray-300">
                   <SelectValue placeholder="Select Year" />
@@ -128,7 +158,19 @@ const Dashboard = () => {
         {/* Yearly Trend with Improved Readability */}
         <Card className="bg-gray-900 border-gray-800">
           <CardHeader>
-            <CardTitle className="text-white">Funding Trends Over Time</CardTitle>
+            <div className="flex items-center">
+              <CardTitle className="text-white">Funding Trends Over Time</CardTitle>
+              <InfoTooltip 
+                className="ml-2"
+                content={
+                  <div>
+                    <p className="font-medium mb-1">Funding Trends Over Time:</p>
+                    <p>This line chart shows how the total grant funding has changed over different fiscal years.</p>
+                    <p className="mt-1">Hover over points to see exact values for each year.</p>
+                  </div>
+                }
+              />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="h-80">
@@ -165,9 +207,29 @@ const Dashboard = () => {
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle className="text-white">Top Ministry Allocations</CardTitle>
-            <Button variant="outline" className="text-gray-300 border-gray-700 hover:bg-gray-800" onClick={handleExport}>
+            <div className="flex items-center">
+              <CardTitle className="text-white">Top Ministry Allocations</CardTitle>
+              <InfoTooltip 
+                className="ml-2"
+                content={
+                  <div>
+                    <p className="font-medium mb-1">Top Ministry Allocations:</p>
+                    <p>This bar chart displays the top ministries by total funding allocation.</p>
+                    <p className="mt-1">You can export this data using the Export Data button.</p>
+                  </div>
+                }
+              />
+            </div>
+            <Button 
+              variant="outline" 
+              className="text-gray-300 border-gray-700 hover:bg-gray-800 flex items-center" 
+              onClick={handleExport}
+            >
               Export Data
+              <InfoTooltip 
+                className="ml-1"
+                content="Click to export the current view as a CSV file"
+              />
             </Button>
           </div>
         </CardHeader>

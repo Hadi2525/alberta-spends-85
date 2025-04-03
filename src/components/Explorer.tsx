@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Flag, Download, Filter, AlertTriangle } from "lucide-react";
 import { grantsData, ministries, fiscalYears, downloadCSV, generateCSV } from "@/data/grantsData";
 import { useToast } from "@/hooks/use-toast";
+import InfoTooltip from "@/components/ui/InfoTooltip";
 
 const Explorer = () => {
   const [filteredData, setFilteredData] = useState(grantsData);
@@ -98,22 +99,44 @@ const Explorer = () => {
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle className="text-white flex items-center gap-2">
-              <Filter size={20} /> Grant Explorer Filters
-            </CardTitle>
+            <div className="flex items-center">
+              <CardTitle className="text-white flex items-center gap-2">
+                <Filter size={20} /> Grant Explorer Filters
+              </CardTitle>
+              <InfoTooltip 
+                className="ml-2"
+                content={
+                  <div>
+                    <p className="font-medium mb-1">Grant Explorer:</p>
+                    <p>This tool allows you to search, filter, and explore all grant data in the system.</p>
+                    <p className="mt-1">Use the filters below to narrow down results by ministry, fiscal year, amount, and more.</p>
+                  </div>
+                }
+              />
+            </div>
             <Button 
               variant="outline" 
-              className="text-gray-300 border-gray-700 hover:bg-gray-800"
+              className="text-gray-300 border-gray-700 hover:bg-gray-800 flex items-center"
               onClick={handleExport}
             >
               <Download className="mr-2 h-4 w-4" /> Export Results
+              <InfoTooltip 
+                className="ml-1"
+                content="Export the current filtered results as a CSV file"
+              />
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div className="space-y-2">
-              <label className="text-sm text-gray-400">Ministry</label>
+              <div className="flex items-center">
+                <label className="text-sm text-gray-400">Ministry</label>
+                <InfoTooltip 
+                  className="ml-1"
+                  content="Filter grants by the ministry responsible for disbursement"
+                />
+              </div>
               <Select value={selectedMinistry} onValueChange={setSelectedMinistry}>
                 <SelectTrigger className="bg-gray-800 border-gray-700">
                   <SelectValue placeholder="Select Ministry" />
@@ -129,7 +152,13 @@ const Explorer = () => {
             </div>
             
             <div className="space-y-2">
-              <label className="text-sm text-gray-400">Fiscal Year</label>
+              <div className="flex items-center">
+                <label className="text-sm text-gray-400">Fiscal Year</label>
+                <InfoTooltip 
+                  className="ml-1"
+                  content="Filter grants by the government fiscal year when they were issued"
+                />
+              </div>
               <Select value={selectedYear} onValueChange={setSelectedYear}>
                 <SelectTrigger className="bg-gray-800 border-gray-700">
                   <SelectValue placeholder="Select Year" />
@@ -145,7 +174,13 @@ const Explorer = () => {
             </div>
             
             <div className="space-y-2">
-              <label className="text-sm text-gray-400">Search Programs & Recipients</label>
+              <div className="flex items-center">
+                <label className="text-sm text-gray-400">Search Programs & Recipients</label>
+                <InfoTooltip 
+                  className="ml-1"
+                  content="Search by program name or recipient organization name"
+                />
+              </div>
               <Input
                 placeholder="Search..."
                 className="bg-gray-800 border-gray-700"
@@ -157,7 +192,13 @@ const Explorer = () => {
           
           <div className="space-y-2 mb-6">
             <div className="flex justify-between">
-              <label className="text-sm text-gray-400">Grant Amount Range</label>
+              <div className="flex items-center">
+                <label className="text-sm text-gray-400">Grant Amount Range</label>
+                <InfoTooltip 
+                  className="ml-1"
+                  content="Adjust the slider to filter grants by their dollar amount"
+                />
+              </div>
               <span className="text-sm text-gray-400">
                 {formatCurrency(amountRange[0])} - {formatCurrency(amountRange[1])}
               </span>
@@ -173,31 +214,47 @@ const Explorer = () => {
           </div>
           
           <div className="flex justify-between items-center mb-2">
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-gray-400 flex items-center">
               {filteredData.length} grants found
+              <InfoTooltip 
+                className="ml-1"
+                content="The number of grants matching your current filter criteria"
+              />
             </div>
             <div className="flex gap-4">
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[160px] bg-gray-800 border-gray-700">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
-                  <SelectItem value="amount" className="text-white hover:bg-gray-700">Amount</SelectItem>
-                  <SelectItem value="ministry" className="text-white hover:bg-gray-700">Ministry</SelectItem>
-                  <SelectItem value="fiscalYear" className="text-white hover:bg-gray-700">Fiscal Year</SelectItem>
-                  <SelectItem value="program" className="text-white hover:bg-gray-700">Program</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-[160px] bg-gray-800 border-gray-700">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700">
+                    <SelectItem value="amount" className="text-white hover:bg-gray-700">Amount</SelectItem>
+                    <SelectItem value="ministry" className="text-white hover:bg-gray-700">Ministry</SelectItem>
+                    <SelectItem value="fiscalYear" className="text-white hover:bg-gray-700">Fiscal Year</SelectItem>
+                    <SelectItem value="program" className="text-white hover:bg-gray-700">Program</SelectItem>
+                  </SelectContent>
+                </Select>
+                <InfoTooltip 
+                  className="ml-1"
+                  content="Choose which field to sort results by"
+                />
+              </div>
               
-              <Select value={sortOrder} onValueChange={setSortOrder}>
-                <SelectTrigger className="w-[160px] bg-gray-800 border-gray-700">
-                  <SelectValue placeholder="Order" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
-                  <SelectItem value="asc" className="text-white hover:bg-gray-700">Ascending</SelectItem>
-                  <SelectItem value="desc" className="text-white hover:bg-gray-700">Descending</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center">
+                <Select value={sortOrder} onValueChange={setSortOrder}>
+                  <SelectTrigger className="w-[160px] bg-gray-800 border-gray-700">
+                    <SelectValue placeholder="Order" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700">
+                    <SelectItem value="asc" className="text-white hover:bg-gray-700">Ascending</SelectItem>
+                    <SelectItem value="desc" className="text-white hover:bg-gray-700">Descending</SelectItem>
+                  </SelectContent>
+                </Select>
+                <InfoTooltip 
+                  className="ml-1"
+                  content="Choose sort direction (ascending or descending)"
+                />
+              </div>
             </div>
           </div>
         </CardContent>
@@ -207,6 +264,19 @@ const Explorer = () => {
       <Card className="bg-gray-900 border-gray-800">
         <CardContent className="pt-6">
           <div className="rounded-md border border-gray-800">
+            <div className="flex items-center mb-2 px-4 pt-2">
+              <h3 className="text-white font-medium">Results</h3>
+              <InfoTooltip 
+                className="ml-2"
+                content={
+                  <div>
+                    <p className="font-medium mb-1">Results Table:</p>
+                    <p>This table shows all grants matching your filter criteria.</p>
+                    <p className="mt-1">Click the flag icon to mark a grant for review.</p>
+                  </div>
+                }
+              />
+            </div>
             <Table>
               <TableHeader className="bg-gray-800">
                 <TableRow>
