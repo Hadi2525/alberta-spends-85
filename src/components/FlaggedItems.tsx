@@ -85,7 +85,7 @@ const FlaggedItems = () => {
     toast({
       title: "Flag Removed",
       description: "This item has been removed from the flagged list.",
-      variant: "success"
+      variant: "default" // Changed from "success" to "default"
     });
   };
 
@@ -102,7 +102,7 @@ const FlaggedItems = () => {
     toast({
       title: action === 'approve' ? "Items Approved" : "Flags Removed",
       description: `${selectedItems.length} items have been ${action === 'approve' ? 'approved' : 'unflagged'}.`,
-      variant: "success"
+      variant: "default" // Changed from "success" to "default"
     });
     
     setSelectedItems([]);
