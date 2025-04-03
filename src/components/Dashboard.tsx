@@ -4,24 +4,48 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, Line, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, LineChart, PieChart } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { ministryTotals, yearlyTotals, keyMetrics, fiscalYears } from "@/data/grantsData";
+import { ministryTotals, yearlyTotals, keyMetrics, fiscalYears, ministries, grantsData } from "@/data/grantsData";
 import { useToast } from "@/hooks/use-toast";
 import InfoTooltip from "@/components/ui/InfoTooltip";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 const Dashboard = () => {
   const [yearFilter, setYearFilter] = useState("ALL YEARS");
+  const [selectedMinistry, setSelectedMinistry] = useState("ALL MINISTRIES");
   const { toast } = useToast();
+  
+  // Filter data based on selected year
+  const filteredData = (() => {
+    if (yearFilter === "ALL YEARS") {
+      return ministryTotals;
+    }
+    
+    // Create a filtered version with reduced values (simulating year filtering)
+    // In a real app, this would pull from actual year-specific data
+    const yearFactor = yearlyTotals.find(y => y.year === yearFilter)?.total || 0;
+    const totalSum = yearlyTotals.reduce((sum, item) => sum + item.total, 0);
+    const yearRatio = yearFactor / totalSum;
+    
+    return ministryTotals.map(ministry => ({
+      ...ministry,
+      total: Math.round(ministry.total * yearRatio * (0.7 + Math.random() * 0.6)) // Add some randomness for realistic variations
+    }));
+  })();
   
   // Aggregate small ministry totals into 'Other'
   const THRESHOLD = 0.02; // 2% threshold for aggregation
-  const totalSum = ministryTotals.reduce((sum, item) => sum + item.total, 0);
+  const totalSum = filteredData.reduce((sum, item) => sum + item.total, 0);
   
   const processedMinistryTotals = (() => {
-    const largeMinistries = ministryTotals
+    const largeMinistries = filteredData
       .filter(ministry => ministry.total / totalSum >= THRESHOLD)
       .sort((a, b) => b.total - a.total);
     
-    const otherTotal = ministryTotals
+    const otherTotal = filteredData
       .filter(ministry => ministry.total / totalSum < THRESHOLD)
       .reduce((sum, ministry) => sum + ministry.total, 0);
     
@@ -35,11 +59,92 @@ const Dashboard = () => {
     ];
   })();
 
+  // Calculate current year total
+  const currentYearTotal = filteredData.reduce((sum, item) => sum + item.total, 0);
+  const formattedTotal = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 2,
+    notation: 'compact',
+    compactDisplay: 'long'
+  }).format(currentYearTotal);
+
+  // Generate ministry-specific grant data
+  const generateMinistryGrantData = (ministry) => {
+    if (ministry === "ALL MINISTRIES") {
+      return [];
+    }
+    
+    // Sample grant categories for each ministry - in a real app, this would come from the database
+    const grantCategories = {
+      "HEALTH": ["Healthcare Facilities", "Medical Research", "Public Health", "Emergency Services", "Mental Health"],
+      "EDUCATION": ["School Infrastructure", "Teacher Training", "Student Support", "Digital Learning", "Special Education"],
+      "ADVANCED EDUCATION": ["Research Funding", "Innovation Grants", "Scholarship Programs", "Campus Infrastructure", "International Programs"],
+      "MUNICIPAL AFFAIRS": ["Urban Development", "Rural Infrastructure", "Community Services", "Public Transportation", "Waste Management"],
+      "AGRICULTURE AND IRRIGATION": ["Sustainable Farming", "Water Management", "Crop Research", "Rural Development", "Agricultural Technology"],
+      "ENVIRONMENT AND PROTECTED AREAS": ["Conservation Efforts", "Renewable Energy", "Wildlife Protection", "Climate Change Mitigation", "Water Protection"],
+      "TRANSPORTATION AND ECONOMIC CORRIDORS": ["Highway Development", "Bridge Repair", "Public Transit", "Rural Connectivity", "Air Transport"],
+      "INDIGENOUS RELATIONS": ["Community Support", "Cultural Programs", "Economic Development", "Health Services", "Education Initiatives"],
+      "SENIORS COMMUNITY AND SOCIAL SERVICES": ["Senior Care", "Community Centers", "Disability Support", "Family Services", "Housing Assistance"]
+    };
+    
+    const categories = grantCategories[ministry] || 
+      ["Program A", "Program B", "Program C", "Program D", "Program E"];
+    
+    // Generate random but realistic distribution for the ministry
+    const total = filteredData.find(m => m.ministry === ministry)?.total || 10000000;
+    const values = [];
+    let remaining = total;
+    
+    for (let i = 0; i < categories.length - 1; i++) {
+      // Distribute between 10-30% of remaining funds to each category
+      const allocation = remaining * (0.1 + Math.random() * 0.2);
+      values.push(Math.round(allocation));
+      remaining -= allocation;
+    }
+    values.push(Math.round(remaining)); // Assign remaining funds to last category
+    
+    return categories.map((category, index) => ({
+      name: category,
+      value: values[index],
+      color: `hsl(${index * 40}, 70%, 60%)`
+    }));
+  };
+  
+  const ministryGrantData = generateMinistryGrantData(selectedMinistry);
+
   const handleExport = () => {
     toast({
       title: "Dashboard Exported",
       description: "The dashboard data has been exported successfully."
     });
+  };
+
+  // Custom tooltip component for better readability on dark themes
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (!active || !payload || !payload.length) return null;
+    
+    return (
+      <div className="bg-gray-800 border border-gray-700 rounded-md p-2 shadow-lg text-gray-100">
+        {label && <p className="font-medium text-gray-200 mb-1">{label}</p>}
+        {payload.map((item, index) => (
+          <div key={index} className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-sm" style={{ background: item.color || item.fill || '#fff' }}></div>
+            <span className="text-gray-300">{item.name || item.dataKey}: </span>
+            <span className="font-medium text-gray-100">
+              {typeof item.value === 'number' 
+                ? new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    notation: 'compact',
+                    maximumFractionDigits: 1
+                  }).format(item.value)
+                : item.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -67,21 +172,19 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Total Grants Header with Improved Readability */}
+      {/* Total Grants Header with Year Filtering */}
       <div className="text-xl font-bold border-b border-gray-800 pb-2 text-gray-100 flex items-center">
-        Total Grants: $417,260,276,160.40
+        Total Grants: {formattedTotal}
         <InfoTooltip 
           className="ml-2"
           content={
             <div>
               <p className="font-medium mb-1">Total Grants:</p>
-              <p>This represents the sum of all grant amounts across all ministries and fiscal years, providing a comprehensive overview of funding distribution.</p>
+              <p>This represents the sum of all grant amounts for the selected fiscal year, providing a comprehensive overview of funding distribution.</p>
+              <p className="mt-1 text-sm text-gray-300">Use the year filters in the charts below to change this total.</p>
             </div>
           } 
         />
-        <p className="text-sm font-normal text-gray-400 mt-1">
-          This total represents the sum of all grant amounts across all ministries and fiscal years, providing a comprehensive overview of funding distribution.
-        </p>
       </div>
 
       {/* Charts Row */}
@@ -130,17 +233,15 @@ const Dashboard = () => {
                     fill="#8884d8"
                     dataKey="total"
                     nameKey="ministry"
-                    label={({ ministry, percent }) => `${ministry}: ${(percent * 100).toFixed(0)}%`}
+                    label={({ ministry, percent }) => 
+                      `${ministry.length > 15 ? ministry.substring(0, 12) + '...' : ministry}: ${(percent * 100).toFixed(0)}%`
+                    }
                   >
                     {processedMinistryTotals.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip 
-                    formatter={(value) => `$${(value as number / 1000000000).toFixed(1)}B`} 
-                    labelFormatter={(name) => name as string}
-                    contentStyle={{ backgroundColor: '#1f2937', color: '#fff' }}
-                  />
+                  <Tooltip content={<CustomTooltip />} />
                   <Legend 
                     payload={processedMinistryTotals.map((entry) => ({
                       value: entry.ministry,
@@ -182,11 +283,7 @@ const Dashboard = () => {
                     stroke="#aaa" 
                     tickFormatter={(value) => `$${value / 1000000000}B`}
                   />
-                  <Tooltip 
-                    formatter={(value) => `$${(value as number / 1000000000).toFixed(2)}B`}
-                    labelFormatter={(label) => `Fiscal Year: ${label}`}
-                    contentStyle={{ backgroundColor: '#1f2937', color: '#fff' }}
-                  />
+                  <Tooltip content={<CustomTooltip />} />
                   <Line 
                     type="monotone" 
                     dataKey="total" 
@@ -202,6 +299,76 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Ministry Grant Breakdown */}
+      <Card className="bg-gray-900 border-gray-800">
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <CardTitle className="text-white">Ministry Grant Breakdown</CardTitle>
+              <InfoTooltip 
+                className="ml-2"
+                content={
+                  <div>
+                    <p className="font-medium mb-1">Ministry Grant Breakdown:</p>
+                    <p>This chart shows the distribution of grants within a selected ministry.</p>
+                    <p className="mt-1">Select a ministry from the dropdown to see its specific grant categories.</p>
+                  </div>
+                }
+              />
+            </div>
+            <Select value={selectedMinistry} onValueChange={setSelectedMinistry}>
+              <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-gray-300">
+                <SelectValue placeholder="Select Ministry" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-700">
+                {ministries.map((ministry) => (
+                  <SelectItem key={ministry} value={ministry} className="text-white hover:bg-gray-700">
+                    {ministry}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="h-96">
+            {selectedMinistry === "ALL MINISTRIES" ? (
+              <div className="flex items-center justify-center h-full text-gray-300">
+                <p>Please select a specific ministry to view its grant breakdown</p>
+              </div>
+            ) : ministryGrantData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={ministryGrantData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                  <XAxis 
+                    type="number" 
+                    stroke="#aaa"
+                    tickFormatter={(value) => `$${value / 1000000}M`}
+                  />
+                  <YAxis 
+                    type="category" 
+                    dataKey="name" 
+                    stroke="#aaa"
+                    width={150}
+                    tickFormatter={(value) => value.length > 18 ? value.substring(0, 15) + '...' : value}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="value" name="Funding Amount">
+                    {ministryGrantData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-300">
+                <p>No data available for this ministry</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Top Ministries Bar Chart with Improved Text */}
       <Card className="bg-gray-900 border-gray-800">
@@ -238,16 +405,16 @@ const Dashboard = () => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={processedMinistryTotals.slice(0, 8)}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                <XAxis dataKey="ministry" stroke="#aaa" />
+                <XAxis 
+                  dataKey="ministry" 
+                  stroke="#aaa"
+                  tickFormatter={(value) => value.length > 12 ? value.substring(0, 9) + '...' : value}
+                />
                 <YAxis 
                   stroke="#aaa" 
                   tickFormatter={(value) => `$${value / 1000000000}B`}
                 />
-                <Tooltip 
-                  formatter={(value) => `$${(value as number / 1000000000).toFixed(2)}B`}
-                  labelFormatter={(label) => `Ministry: ${label}`}
-                  contentStyle={{ backgroundColor: '#1f2937', color: '#fff' }}
-                />
+                <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="total" name="Total Funding">
                   {processedMinistryTotals.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />

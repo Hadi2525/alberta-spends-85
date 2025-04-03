@@ -1,4 +1,3 @@
-
 // Types for our data
 export interface Grant {
   id: string;
@@ -148,4 +147,57 @@ export const downloadCSV = (data: string, filename: string): void => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+};
+
+// Generate sample grant data for a specific ministry
+export const getMinistryGrantData = (ministry: string, year?: string) => {
+  if (ministry === "ALL MINISTRIES") {
+    return [];
+  }
+  
+  // Sample grant categories for each ministry
+  const grantCategories: Record<string, string[]> = {
+    "HEALTH": ["Healthcare Facilities", "Medical Research", "Public Health", "Emergency Services", "Mental Health"],
+    "EDUCATION": ["School Infrastructure", "Teacher Training", "Student Support", "Digital Learning", "Special Education"],
+    "ADVANCED EDUCATION": ["Research Funding", "Innovation Grants", "Scholarship Programs", "Campus Infrastructure", "International Programs"],
+    "MUNICIPAL AFFAIRS": ["Urban Development", "Rural Infrastructure", "Community Services", "Public Transportation", "Waste Management"],
+    "AGRICULTURE AND IRRIGATION": ["Sustainable Farming", "Water Management", "Crop Research", "Rural Development", "Agricultural Technology"],
+    "ENVIRONMENT AND PROTECTED AREAS": ["Conservation Efforts", "Renewable Energy", "Wildlife Protection", "Climate Change Mitigation", "Water Protection"],
+    "INDIGENOUS RELATIONS": ["Community Support", "Cultural Programs", "Economic Development", "Health Services", "Education Initiatives"],
+    "SENIORS COMMUNITY AND SOCIAL SERVICES": ["Senior Care", "Community Centers", "Disability Support", "Family Services", "Housing Assistance"]
+  };
+  
+  const categories = grantCategories[ministry] || 
+    ["Program A", "Program B", "Program C", "Program D", "Program E"];
+  
+  // Find the ministry in the totals or use a default value
+  const ministryData = ministryTotals.find(m => m.ministry === ministry);
+  const total = ministryData?.total || 10000000;
+  
+  // Apply year filtering if provided
+  let adjustedTotal = total;
+  if (year && year !== "ALL YEARS") {
+    const yearFactor = yearlyTotals.find(y => y.year === year)?.total || 0;
+    const totalSum = yearlyTotals.reduce((sum, item) => sum + item.total, 0);
+    const yearRatio = yearFactor / totalSum;
+    adjustedTotal = Math.round(total * yearRatio * (0.7 + Math.random() * 0.6));
+  }
+  
+  // Generate distribution
+  const values: number[] = [];
+  let remaining = adjustedTotal;
+  
+  for (let i = 0; i < categories.length - 1; i++) {
+    // Distribute between 10-30% of remaining funds to each category
+    const allocation = remaining * (0.1 + Math.random() * 0.2);
+    values.push(Math.round(allocation));
+    remaining -= allocation;
+  }
+  values.push(Math.round(remaining)); // Assign remaining funds to last category
+  
+  return categories.map((category, index) => ({
+    name: category,
+    value: values[index],
+    color: `hsl(${120 + index * 40}, 70%, 60%)`
+  }));
 };
