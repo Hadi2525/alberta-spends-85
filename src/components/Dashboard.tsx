@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, Line, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, LineChart, PieChart } from "recharts";
@@ -491,7 +490,7 @@ const Dashboard = () => {
                       <Legend 
                         payload={processedMinistryTotals.map((entry) => ({
                           value: entry.ministry,
-                          type: 'square',
+                          type: "square" as const,
                           color: entry.color
                         }))}
                         wrapperStyle={{ color: '#fff' }}
@@ -538,7 +537,7 @@ const Dashboard = () => {
                       <Legend 
                         payload={(visualizationTab === "ministry" ? processedMinistryTotals : programSpendingData).map((entry) => ({
                           value: visualizationTab === "ministry" ? entry.ministry : entry.name,
-                          type: 'square',
+                          type: "square" as const,
                           color: entry.color
                         }))}
                         wrapperStyle={{ color: '#fff' }}
