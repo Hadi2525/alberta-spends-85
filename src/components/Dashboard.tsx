@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, Line, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, LineChart, PieChart } from "recharts";
@@ -18,26 +17,22 @@ const Dashboard = () => {
   const [selectedMinistry, setSelectedMinistry] = useState("ALL MINISTRIES");
   const { toast } = useToast();
   
-  // Filter data based on selected year
   const filteredData = (() => {
     if (yearFilter === "ALL YEARS") {
       return ministryTotals;
     }
     
-    // Create a filtered version with reduced values (simulating year filtering)
-    // In a real app, this would pull from actual year-specific data
     const yearFactor = yearlyTotals.find(y => y.year === yearFilter)?.total || 0;
     const totalSum = yearlyTotals.reduce((sum, item) => sum + item.total, 0);
     const yearRatio = yearFactor / totalSum;
     
     return ministryTotals.map(ministry => ({
       ...ministry,
-      total: Math.round(ministry.total * yearRatio * (0.7 + Math.random() * 0.6)) // Add some randomness for realistic variations
+      total: Math.round(ministry.total * yearRatio * (0.7 + Math.random() * 0.6))
     }));
   })();
   
-  // Aggregate small ministry totals into 'Other'
-  const THRESHOLD = 0.02; // 2% threshold for aggregation
+  const THRESHOLD = 0.02;
   const totalSum = filteredData.reduce((sum, item) => sum + item.total, 0);
   
   const processedMinistryTotals = (() => {
@@ -54,12 +49,11 @@ const Dashboard = () => {
       { 
         ministry: 'Other Ministries', 
         total: otherTotal, 
-        color: '#6B7280' // Neutral gray for 'Other'
+        color: '#6B7280'
       }
     ];
   })();
-
-  // Calculate current year total
+  
   const currentYearTotal = filteredData.reduce((sum, item) => sum + item.total, 0);
   const formattedTotal = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -69,13 +63,11 @@ const Dashboard = () => {
     compactDisplay: 'long'
   }).format(currentYearTotal);
 
-  // Generate ministry-specific grant data
   const generateMinistryGrantData = (ministry) => {
     if (ministry === "ALL MINISTRIES") {
       return [];
     }
     
-    // Sample grant categories for each ministry - in a real app, this would come from the database
     const grantCategories = {
       "HEALTH": ["Healthcare Facilities", "Medical Research", "Public Health", "Emergency Services", "Mental Health"],
       "EDUCATION": ["School Infrastructure", "Teacher Training", "Student Support", "Digital Learning", "Special Education"],
@@ -91,18 +83,16 @@ const Dashboard = () => {
     const categories = grantCategories[ministry] || 
       ["Program A", "Program B", "Program C", "Program D", "Program E"];
     
-    // Generate random but realistic distribution for the ministry
     const total = filteredData.find(m => m.ministry === ministry)?.total || 10000000;
     const values = [];
     let remaining = total;
     
     for (let i = 0; i < categories.length - 1; i++) {
-      // Distribute between 10-30% of remaining funds to each category
       const allocation = remaining * (0.1 + Math.random() * 0.2);
       values.push(Math.round(allocation));
       remaining -= allocation;
     }
-    values.push(Math.round(remaining)); // Assign remaining funds to last category
+    values.push(Math.round(remaining));
     
     return categories.map((category, index) => ({
       name: category,
@@ -120,8 +110,7 @@ const Dashboard = () => {
     });
   };
 
-  // Custom tooltip component for better readability on dark themes
-  const CustomTooltip = ({ active, payload, label }) => {
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
     if (!active || !payload || !payload.length) return null;
     
     return (
@@ -149,7 +138,6 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {keyMetrics.map((metric, index) => (
           <Card key={index} className="bg-gray-900 border-gray-800">
@@ -172,7 +160,6 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Total Grants Header with Year Filtering */}
       <div className="text-xl font-bold border-b border-gray-800 pb-2 text-gray-100 flex items-center">
         Total Grants: {formattedTotal}
         <InfoTooltip 
@@ -187,9 +174,7 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Ministry Distribution with Consolidated Other */}
         <Card className="bg-gray-900 border-gray-800">
           <CardHeader>
             <div className="flex justify-between items-center">
@@ -241,7 +226,7 @@ const Dashboard = () => {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={(props) => <CustomTooltip {...props} />} />
                   <Legend 
                     payload={processedMinistryTotals.map((entry) => ({
                       value: entry.ministry,
@@ -256,7 +241,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Yearly Trend with Improved Readability */}
         <Card className="bg-gray-900 border-gray-800">
           <CardHeader>
             <div className="flex items-center">
@@ -283,7 +267,7 @@ const Dashboard = () => {
                     stroke="#aaa" 
                     tickFormatter={(value) => `$${value / 1000000000}B`}
                   />
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={(props) => <CustomTooltip {...props} />} />
                   <Line 
                     type="monotone" 
                     dataKey="total" 
@@ -300,7 +284,6 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Ministry Grant Breakdown */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -353,7 +336,7 @@ const Dashboard = () => {
                     width={150}
                     tickFormatter={(value) => value.length > 18 ? value.substring(0, 15) + '...' : value}
                   />
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={(props) => <CustomTooltip {...props} />} />
                   <Bar dataKey="value" name="Funding Amount">
                     {ministryGrantData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -370,7 +353,6 @@ const Dashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Top Ministries Bar Chart with Improved Text */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -414,7 +396,7 @@ const Dashboard = () => {
                   stroke="#aaa" 
                   tickFormatter={(value) => `$${value / 1000000000}B`}
                 />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={(props) => <CustomTooltip {...props} />} />
                 <Bar dataKey="total" name="Total Funding">
                   {processedMinistryTotals.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
