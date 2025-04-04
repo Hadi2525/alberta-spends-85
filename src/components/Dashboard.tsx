@@ -11,7 +11,11 @@ import { Input } from "@/components/ui/input";
 import { ministryTotals, yearlyTotals, keyMetrics, fiscalYears, ministries, grantsData } from "@/data/grantsData";
 import { useToast } from "@/hooks/use-toast";
 import InfoTooltip from "@/components/ui/InfoTooltip";
-import { AlertTriangle, Flag, Filter, Download } from "lucide-react";
+import { AlertTriangle, Flag, Download, PieChartIcon, BarChart3, LineChart as LineChartIcon } from "lucide-react";
+import DashboardFilters from "@/components/DashboardFilters";
+import TopRecipientsTable from "@/components/TopRecipientsTable";
+import DataQualityCard from "@/components/DataQualityCard";
+import ReviewList from "@/components/ReviewList";
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -19,13 +23,84 @@ interface CustomTooltipProps {
   label?: string;
 }
 
+// Sample data for data quality
+const dataQualityIssues = [
+  { field: "Recipient Name", issueCount: 45, percentage: 3.2 },
+  { field: "Ministry", issueCount: 12, percentage: 0.8 },
+  { field: "Program Name", issueCount: 68, percentage: 4.8 },
+  { field: "Business Unit", issueCount: 156, percentage: 11.1 },
+  { field: "Amount", issueCount: 29, percentage: 2.1 },
+  { field: "Fiscal Year", issueCount: 8, percentage: 0.6 }
+];
+
+// Mock top recipients by amount
+const topRecipientsByAmount = [
+  { id: "1", name: "Alberta Health Services", totalAmount: 25000000, grantCount: 3, isFlagged: false, riskFactors: ["Operational Grant"] },
+  { id: "2", name: "University of Alberta", totalAmount: 18500000, grantCount: 8, isFlagged: false, riskFactors: ["Multiple Programs"] },
+  { id: "3", name: "TransAlta Corporation", totalAmount: 15200000, grantCount: 2, isFlagged: false, riskFactors: ["Corporate Welfare", "Large Amount"] },
+  { id: "4", name: "City of Calgary", totalAmount: 12400000, grantCount: 5, isFlagged: false, riskFactors: [] },
+  { id: "5", name: "Suncor Energy Inc.", totalAmount: 11800000, grantCount: 1, isFlagged: false, riskFactors: ["Corporate Welfare", "Large Amount"] },
+  { id: "6", name: "ATCO Group", totalAmount: 9200000, grantCount: 3, isFlagged: false, riskFactors: ["Corporate Welfare"] },
+  { id: "7", name: "University of Calgary", totalAmount: 8500000, grantCount: 6, isFlagged: false, riskFactors: ["Multiple Programs"] },
+  { id: "8", name: "Edmonton Public Schools", totalAmount: 7300000, grantCount: 2, isFlagged: false, riskFactors: [] },
+  { id: "9", name: "Cenovus Energy Inc.", totalAmount: 6700000, grantCount: 1, isFlagged: false, riskFactors: ["Corporate Welfare"] },
+  { id: "10", name: "Alberta Innovates", totalAmount: 5900000, grantCount: 4, isFlagged: false, riskFactors: [] }
+];
+
+// Mock top recipients by program count
+const topRecipientsByProgramCount = [
+  { id: "11", name: "University of Alberta", programCount: 8, totalAmount: 18500000, isFlagged: false, riskFactors: ["Multiple Programs", "High Program Count"] },
+  { id: "12", name: "University of Calgary", programCount: 6, totalAmount: 8500000, isFlagged: false, riskFactors: ["Multiple Programs", "High Program Count"] },
+  { id: "13", name: "City of Calgary", programCount: 5, totalAmount: 12400000, isFlagged: false, riskFactors: ["Multiple Programs"] },
+  { id: "14", name: "Alberta Innovates", programCount: 4, totalAmount: 5900000, isFlagged: false, riskFactors: [] },
+  { id: "15", name: "Athabasca University", programCount: 4, totalAmount: 3200000, isFlagged: false, riskFactors: [] },
+  { id: "16", name: "City of Edmonton", programCount: 4, totalAmount: 4800000, isFlagged: false, riskFactors: [] },
+  { id: "17", name: "NAIT", programCount: 3, totalAmount: 2700000, isFlagged: false, riskFactors: [] },
+  { id: "18", name: "Alberta Health Services", programCount: 3, totalAmount: 25000000, isFlagged: false, riskFactors: ["Operational Grant", "Large Amount"] },
+  { id: "19", name: "ATCO Group", programCount: 3, totalAmount: 9200000, isFlagged: false, riskFactors: ["Corporate Welfare"] },
+  { id: "20", name: "SAIT", programCount: 3, totalAmount: 2200000, isFlagged: false, riskFactors: [] }
+];
+
+// Sample program spending data
+const programSpendingData = [
+  { name: "Healthcare Infrastructure", value: 32500000, color: "#4f46e5" },
+  { name: "Education Grants", value: 26800000, color: "#8b5cf6" },
+  { name: "Municipal Support", value: 19300000, color: "#d946ef" },
+  { name: "Energy Innovation", value: 15700000, color: "#ec4899" },
+  { name: "Transportation", value: 12400000, color: "#f43f5e" },
+  { name: "Environmental Protection", value: 10800000, color: "#06b6d4" },
+  { name: "Other Programs", value: 42500000, color: "#6b7280" }
+];
+
+// Mock data for spending trends
+const spendingTrendsData = [
+  { year: "2019-2020", totalSpending: 32000000, recipientCount: 120, averageGrant: 266667 },
+  { year: "2020-2021", totalSpending: 45000000, recipientCount: 150, averageGrant: 300000 },
+  { year: "2021-2022", totalSpending: 78000000, recipientCount: 190, averageGrant: 410526 },
+  { year: "2022-2023", totalSpending: 95000000, recipientCount: 210, averageGrant: 452381 },
+  { year: "2023-2024", totalSpending: 110000000, recipientCount: 230, averageGrant: 478261 }
+];
+
 const Dashboard = () => {
   const [yearFilter, setYearFilter] = useState("ALL YEARS");
   const [selectedMinistry, setSelectedMinistry] = useState("ALL MINISTRIES");
   const [corporateWelfareTab, setCorporateWelfareTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [visualizationTab, setVisualizationTab] = useState("ministry");
+  const [reviewListItems, setReviewListItems] = useState<any[]>([]);
+  const [isFilterExpanded, setIsFilterExpanded] = useState(false);
+  const [viewMode, setViewMode] = useState("dashboard");
   const { toast } = useToast();
-  
+
+  // Dashboard filters state
+  const [activeFilters, setActiveFilters] = useState({
+    years: ["ALL YEARS"],
+    ministries: ["ALL MINISTRIES"],
+    programs: ["ALL PROGRAMS"],
+    businessUnits: ["ALL BUSINESS UNITS"],
+    excludeOperational: false
+  });
+
   // Identify corporate welfare and unnecessary programs
   const corporateWelfarePrograms = grantsData.filter(grant => 
     (grant.recipient.includes("Corp") || grant.recipient.includes("Ltd") || grant.recipient.includes("Inc")) && 
@@ -184,6 +259,49 @@ const Dashboard = () => {
     return filtered.slice(0, 5); // Limiting to 5 items for display
   };
 
+  // Handler for flagging a recipient
+  const handleFlagRecipient = (id: string, flag: boolean) => {
+    // Update topRecipientsByAmount
+    const updatedTopByAmount = topRecipientsByAmount.map(recipient => 
+      recipient.id === id ? { ...recipient, isFlagged: flag } : recipient
+    );
+    
+    // Update topRecipientsByProgramCount
+    const updatedTopByProgramCount = topRecipientsByProgramCount.map(recipient => 
+      recipient.id === id ? { ...recipient, isFlagged: flag } : recipient
+    );
+  };
+
+  // Handler for adding an item to the review list
+  const addToReviewList = (item: any) => {
+    const recipient = item.programCount 
+      ? { ...item, type: 'recipient' } 
+      : { ...item, type: 'recipient' };
+    
+    const newReviewItem = {
+      id: recipient.id,
+      name: recipient.name,
+      type: 'recipient',
+      totalAmount: recipient.totalAmount,
+      programCount: recipient.programCount || 0,
+      flagReason: recipient.riskFactors,
+      dateAdded: new Date()
+    };
+    
+    // Check if the item is already in the review list
+    if (!reviewListItems.some(existingItem => existingItem.id === newReviewItem.id)) {
+      setReviewListItems(prev => [...prev, newReviewItem]);
+    }
+  };
+  
+  // Handler for removing an item from the review list
+  const removeFromReviewList = (id: string) => {
+    setReviewListItems(prev => prev.filter(item => item.id !== id));
+    
+    // Also update the isFlagged property in the recipient lists
+    handleFlagRecipient(id, false);
+  };
+
   const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (!active || !payload || !payload.length) return null;
     
@@ -210,8 +328,31 @@ const Dashboard = () => {
     );
   };
 
+  // Render the main dashboard content
+  if (viewMode === "review-list") {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-white">Review List</h2>
+          <Button 
+            variant="outline" 
+            className="text-gray-300 border-gray-700 hover:bg-gray-800"
+            onClick={() => setViewMode("dashboard")}
+          >
+            Back to Dashboard
+          </Button>
+        </div>
+        <ReviewList 
+          items={reviewListItems} 
+          removeFromReviewList={removeFromReviewList} 
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* Key Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {keyMetrics.map((metric, index) => (
           <Card key={index} className="bg-gray-900 border-gray-800">
@@ -234,6 +375,15 @@ const Dashboard = () => {
         ))}
       </div>
 
+      {/* Dashboard Filters */}
+      <DashboardFilters 
+        activeFilters={activeFilters}
+        setActiveFilters={setActiveFilters}
+        isFilterExpanded={isFilterExpanded}
+        setIsFilterExpanded={setIsFilterExpanded}
+      />
+
+      {/* Total Grant Summary */}
       <div className="text-xl font-bold border-b border-gray-800 pb-2 text-gray-100 flex items-center">
         Total Grants: {formattedTotal}
         <InfoTooltip 
@@ -241,192 +391,318 @@ const Dashboard = () => {
           content={
             <div>
               <p className="font-medium mb-1">Total Grants:</p>
-              <p>This represents the sum of all grant amounts for the selected fiscal year, providing a comprehensive overview of funding distribution.</p>
-              <p className="mt-1 text-sm text-gray-300">Use the year filters in the charts below to change this total.</p>
+              <p>This represents the sum of all grant amounts for the selected filters, providing a comprehensive overview of funding distribution.</p>
+              <p className="mt-1 text-sm text-gray-300">Use the filters above to adjust this total.</p>
             </div>
           } 
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-gray-900 border-gray-800">
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <div className="flex items-center">
-                <CardTitle className="text-white">Ministry Funding Distribution</CardTitle>
-                <InfoTooltip 
-                  className="ml-2"
-                  content={
-                    <div>
-                      <p className="font-medium mb-1">Ministry Funding Distribution:</p>
-                      <p>This pie chart shows how funding is distributed across different ministries. Small ministries (less than 2% of total funding) are grouped as "Other Ministries" for clarity.</p>
-                      <p className="mt-1">Use the year filter to view distribution for specific fiscal years.</p>
-                    </div>
-                  }
-                />
-              </div>
-              <Select value={yearFilter} onValueChange={setYearFilter}>
-                <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-gray-300">
-                  <SelectValue placeholder="Select Year" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
-                  {fiscalYears.map((year) => (
-                    <SelectItem key={year} value={year} className="text-white hover:bg-gray-700">
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={processedMinistryTotals}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="total"
-                    nameKey="ministry"
-                    label={({ ministry, percent }) => 
-                      `${ministry.length > 15 ? ministry.substring(0, 12) + '...' : ministry}: ${(percent * 100).toFixed(0)}%`
-                    }
-                  >
-                    {processedMinistryTotals.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={(props) => <CustomTooltip {...props} />} />
-                  <Legend 
-                    payload={processedMinistryTotals.map((entry) => ({
-                      value: entry.ministry,
-                      type: 'square',
-                      color: entry.color
-                    }))}
-                    wrapperStyle={{ color: '#fff' }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gray-900 border-gray-800">
-          <CardHeader>
-            <div className="flex items-center">
-              <CardTitle className="text-white">Funding Trends Over Time</CardTitle>
-              <InfoTooltip 
-                className="ml-2"
-                content={
-                  <div>
-                    <p className="font-medium mb-1">Funding Trends Over Time:</p>
-                    <p>This line chart shows how the total grant funding has changed over different fiscal years.</p>
-                    <p className="mt-1">Hover over points to see exact values for each year.</p>
-                  </div>
-                }
-              />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={yearlyTotals}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                  <XAxis dataKey="year" stroke="#aaa" />
-                  <YAxis 
-                    stroke="#aaa" 
-                    tickFormatter={(value) => `$${value / 1000000000}B`}
-                  />
-                  <Tooltip content={(props) => <CustomTooltip {...props} />} />
-                  <Line 
-                    type="monotone" 
-                    dataKey="total" 
-                    stroke="#2dd4bf" 
-                    strokeWidth={2}
-                    dot={{ fill: '#2dd4bf', r: 4 }}
-                    activeDot={{ r: 8 }}
-                    name="Total Funding"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
+      {/* Main Visualization Tabs */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <CardTitle className="text-white">Ministry Grant Breakdown</CardTitle>
+              <CardTitle className="text-white">Grant Visualizations</CardTitle>
               <InfoTooltip 
                 className="ml-2"
                 content={
                   <div>
-                    <p className="font-medium mb-1">Ministry Grant Breakdown:</p>
-                    <p>This chart shows the distribution of grants within a selected ministry.</p>
-                    <p className="mt-1">Select a ministry from the dropdown to see its specific grant categories.</p>
+                    <p className="font-medium mb-1">Grant Visualizations:</p>
+                    <p>This section provides multiple views of the grant data to help identify patterns and anomalies.</p>
+                    <p className="mt-1">Use the tabs to switch between different visualization types.</p>
                   </div>
                 }
               />
             </div>
-            <Select value={selectedMinistry} onValueChange={setSelectedMinistry}>
-              <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-gray-300">
-                <SelectValue placeholder="Select Ministry" />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
-                {ministries.map((ministry) => (
-                  <SelectItem key={ministry} value={ministry} className="text-white hover:bg-gray-700">
-                    {ministry}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-gray-300 border-gray-700 hover:bg-gray-800 flex items-center gap-1"
+                onClick={() => setViewMode("review-list")}
+              >
+                <Flag className="h-4 w-4" /> View Review List ({reviewListItems.length})
+              </Button>
+              <Button 
+                variant="outline" 
+                className="text-gray-300 border-gray-700 hover:bg-gray-800 flex items-center"
+                onClick={handleExport}
+              >
+                <Download className="mr-2 h-4 w-4" /> Export Data
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="h-96">
-            {selectedMinistry === "ALL MINISTRIES" ? (
-              <div className="flex items-center justify-center h-full text-gray-300">
-                <p>Please select a specific ministry to view its grant breakdown</p>
+          <Tabs defaultValue="distribution" className="w-full">
+            <TabsList className="bg-gray-800 mb-4">
+              <TabsTrigger value="distribution" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white flex items-center gap-1">
+                <PieChartIcon className="h-4 w-4" /> Distribution
+              </TabsTrigger>
+              <TabsTrigger value="spending" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white flex items-center gap-1">
+                <BarChart3 className="h-4 w-4" /> Spending by Program
+              </TabsTrigger>
+              <TabsTrigger value="trends" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white flex items-center gap-1">
+                <LineChartIcon className="h-4 w-4" /> Spending Trends
+              </TabsTrigger>
+            </TabsList>
+            
+            {/* Distribution Tab Content */}
+            <TabsContent value="distribution">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Ministry Distribution Pie Chart */}
+                <div className="h-80">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="text-lg font-medium text-gray-100">Ministry Funding Distribution</h3>
+                    <Select value={yearFilter} onValueChange={setYearFilter}>
+                      <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-gray-300">
+                        <SelectValue placeholder="Select Year" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-800 border-gray-700">
+                        {fiscalYears.map((year) => (
+                          <SelectItem key={year} value={year} className="text-white hover:bg-gray-700">
+                            {year}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={processedMinistryTotals}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="total"
+                        nameKey="ministry"
+                        label={({ ministry, percent }) => 
+                          `${ministry.length > 15 ? ministry.substring(0, 12) + '...' : ministry}: ${(percent * 100).toFixed(0)}%`
+                        }
+                      >
+                        {processedMinistryTotals.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={(props) => <CustomTooltip {...props} />} />
+                      <Legend 
+                        payload={processedMinistryTotals.map((entry) => ({
+                          value: entry.ministry,
+                          type: 'square',
+                          color: entry.color
+                        }))}
+                        wrapperStyle={{ color: '#fff' }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                
+                {/* Program Distribution Pie Chart */}
+                <div className="h-80">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="text-lg font-medium text-gray-100">Program Spending Distribution</h3>
+                    <Tabs value={visualizationTab} onValueChange={setVisualizationTab} className="w-auto">
+                      <TabsList className="bg-gray-800">
+                        <TabsTrigger value="ministry" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+                          By Ministry
+                        </TabsTrigger>
+                        <TabsTrigger value="program" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+                          By Program
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={visualizationTab === "ministry" ? processedMinistryTotals : programSpendingData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        nameKey="name"
+                        label={({ name, percent }) => 
+                          `${name.length > 15 ? name.substring(0, 12) + '...' : name}: ${(percent * 100).toFixed(0)}%`
+                        }
+                      >
+                        {(visualizationTab === "ministry" ? processedMinistryTotals : programSpendingData).map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={(props) => <CustomTooltip {...props} />} />
+                      <Legend 
+                        payload={(visualizationTab === "ministry" ? processedMinistryTotals : programSpendingData).map((entry) => ({
+                          value: visualizationTab === "ministry" ? entry.ministry : entry.name,
+                          type: 'square',
+                          color: entry.color
+                        }))}
+                        wrapperStyle={{ color: '#fff' }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
-            ) : ministryGrantData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={ministryGrantData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                  <XAxis 
-                    type="number" 
-                    stroke="#aaa"
-                    tickFormatter={(value) => `$${value / 1000000}M`}
-                  />
-                  <YAxis 
-                    type="category" 
-                    dataKey="name" 
-                    stroke="#aaa"
-                    width={150}
-                    tickFormatter={(value) => value.length > 18 ? value.substring(0, 15) + '...' : value}
-                  />
-                  <Tooltip content={(props) => <CustomTooltip {...props} />} />
-                  <Bar dataKey="value" name="Funding Amount">
-                    {ministryGrantData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full text-gray-300">
-                <p>No data available for this ministry</p>
+            </TabsContent>
+            
+            {/* Spending By Program Tab Content */}
+            <TabsContent value="spending">
+              <div className="h-96">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-lg font-medium text-gray-100">Total Spending by Program</h3>
+                  <Select value={selectedMinistry} onValueChange={setSelectedMinistry}>
+                    <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-gray-300">
+                      <SelectValue placeholder="Select Ministry" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700">
+                      {ministries.map((ministry) => (
+                        <SelectItem key={ministry} value={ministry} className="text-white hover:bg-gray-700">
+                          {ministry}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {selectedMinistry === "ALL MINISTRIES" ? (
+                  <div className="flex items-center justify-center h-full text-gray-300">
+                    <p>Please select a specific ministry to view its grant breakdown</p>
+                  </div>
+                ) : ministryGrantData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={ministryGrantData} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                      <XAxis 
+                        type="number" 
+                        stroke="#aaa"
+                        tickFormatter={(value) => `$${value / 1000000}M`}
+                      />
+                      <YAxis 
+                        type="category" 
+                        dataKey="name" 
+                        stroke="#aaa"
+                        width={180}
+                        tickFormatter={(value) => value.length > 25 ? value.substring(0, 22) + '...' : value}
+                      />
+                      <Tooltip content={(props) => <CustomTooltip {...props} />} />
+                      <Bar dataKey="value" name="Funding Amount">
+                        {ministryGrantData.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={entry.color} 
+                            // Highlight programs with unusually high spending
+                            stroke={entry.value > ministryGrantData.reduce((sum, item) => sum + item.value, 0) / ministryGrantData.length * 1.5 ? "#f43f5e" : undefined}
+                            strokeWidth={entry.value > ministryGrantData.reduce((sum, item) => sum + item.value, 0) / ministryGrantData.length * 1.5 ? 2 : 0}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-300">
+                    <p>No data available for this ministry</p>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </TabsContent>
+            
+            {/* Spending Trends Tab Content */}
+            <TabsContent value="trends">
+              <div className="h-96">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-lg font-medium text-gray-100">Spending Trends Over Time</h3>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-teal-600">Total Spending</Badge>
+                    <Badge className="bg-blue-600">Recipient Count</Badge>
+                    <Badge className="bg-purple-600">Average Grant</Badge>
+                  </div>
+                </div>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={spendingTrendsData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                    <XAxis dataKey="year" stroke="#aaa" />
+                    <YAxis 
+                      yAxisId="left"
+                      stroke="#aaa" 
+                      tickFormatter={(value) => `$${value / 1000000}M`}
+                    />
+                    <YAxis 
+                      yAxisId="right"
+                      orientation="right"
+                      stroke="#aaa"
+                      domain={[0, 'dataMax + 50']}
+                    />
+                    <Tooltip content={(props) => <CustomTooltip {...props} />} />
+                    <Legend />
+                    <Line 
+                      yAxisId="left"
+                      type="monotone" 
+                      dataKey="totalSpending" 
+                      stroke="#14b8a6" 
+                      strokeWidth={2}
+                      dot={{ fill: '#14b8a6', r: 4 }}
+                      activeDot={{ r: 8 }}
+                      name="Total Spending"
+                    />
+                    <Line 
+                      yAxisId="right"
+                      type="monotone" 
+                      dataKey="recipientCount" 
+                      stroke="#3b82f6" 
+                      strokeWidth={2}
+                      dot={{ fill: '#3b82f6', r: 4 }}
+                      activeDot={{ r: 8 }}
+                      name="Recipient Count"
+                    />
+                    <Line 
+                      yAxisId="left"
+                      type="monotone" 
+                      dataKey="averageGrant" 
+                      stroke="#a855f7" 
+                      strokeWidth={2}
+                      dot={{ fill: '#a855f7', r: 4 }}
+                      activeDot={{ r: 8 }}
+                      name="Average Grant"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
+      {/* Data Quality Card */}
+      <DataQualityCard
+        totalRecords={1400}
+        issuesCount={187}
+        issuesByField={dataQualityIssues}
+      />
+
+      {/* Top Recipients by Program Count */}
+      <TopRecipientsTable
+        title="Top Recipients by Program Count"
+        subtitle="Organizations receiving grants from multiple different programs, potentially indicating over-reliance on government funding."
+        recipients={topRecipientsByProgramCount}
+        type="programCount"
+        onFlagRecipient={handleFlagRecipient}
+        addToReviewList={addToReviewList}
+      />
+
+      {/* Top Recipients by Amount */}
+      <TopRecipientsTable
+        title="Top Recipients by Amount"
+        subtitle="Organizations receiving the largest total grant amounts across all programs."
+        recipients={topRecipientsByAmount}
+        type="amount"
+        onFlagRecipient={handleFlagRecipient}
+        addToReviewList={addToReviewList}
+      />
+      
       {/* Risk Assessment Section */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>

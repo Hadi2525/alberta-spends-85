@@ -2,18 +2,11 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { BarChart, LineChart, PieChart, Pie, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import Dashboard from "@/components/Dashboard";
 import Explorer from "@/components/Explorer";
 import FlaggedItems from "@/components/FlaggedItems";
 import Documentation from "@/components/Documentation";
-import { grantsData, ministryTotals, yearlyTotals, keyMetrics } from "@/data/grantsData";
 import InfoTooltip from "@/components/ui/InfoTooltip";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
