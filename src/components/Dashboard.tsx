@@ -533,63 +533,63 @@ const Dashboard = () => {
                 </TableBody>
               </Table>
             </div>
-          </CardContent>
-        </Card>
+          </Tabs>
+        </CardContent>
+      </Card>
 
-        {/* Organizations with Multiple Grants Section */}
-        <Card className="bg-gray-900 border-gray-800">
-          <CardHeader>
-            <div className="flex items-center">
-              <CardTitle className="text-white">
-                <Flag className="inline-block mr-2 h-5 w-5 text-teal-400" />
-                Organizations Exploiting Multiple Grant Programs
-              </CardTitle>
-              <InfoTooltip 
-                className="ml-2"
-                content={
-                  <div>
-                    <p className="font-medium mb-1">Multiple Grant Recipients:</p>
-                    <p>This chart identifies organizations that are receiving grants from multiple different programs, which may indicate over-reliance on government funding or exploitation of the system.</p>
-                  </div>
-                }
-              />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="h-96">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart 
-                  data={multipleGrantRecipients.slice(0, 10)} 
-                  layout="vertical"
-                  margin={{ top: 5, right: 30, left: 150, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                  <XAxis 
-                    type="number" 
-                    stroke="#aaa"
-                  />
-                  <YAxis 
-                    type="category" 
-                    dataKey="recipient" 
-                    stroke="#aaa"
-                    tickFormatter={(value) => value.length > 25 ? value.substring(0, 22) + '...' : value}
-                  />
-                  <Tooltip 
-                    content={(props) => <CustomTooltip {...props} />}
-                    formatter={(value) => [`${value} Programs`, "Programs Used"]}
-                    labelFormatter={(value) => `Recipient: ${value}`}
-                  />
-                  <Bar 
-                    dataKey="count" 
-                    name="Number of Grant Programs" 
-                    fill="#3b82f6"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Organizations with Multiple Grants Section */}
+      <Card className="bg-gray-900 border-gray-800">
+        <CardHeader>
+          <div className="flex items-center">
+            <CardTitle className="text-white">
+              <Flag className="inline-block mr-2 h-5 w-5 text-teal-400" />
+              Organizations Exploiting Multiple Grant Programs
+            </CardTitle>
+            <InfoTooltip 
+              className="ml-2"
+              content={
+                <div>
+                  <p className="font-medium mb-1">Multiple Grant Recipients:</p>
+                  <p>This chart identifies organizations that are receiving grants from multiple different programs, which may indicate over-reliance on government funding or exploitation of the system.</p>
+                </div>
+              }
+            />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="h-96">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart 
+                data={multipleGrantRecipients.slice(0, 10)} 
+                layout="vertical"
+                margin={{ top: 5, right: 30, left: 150, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                <XAxis 
+                  type="number" 
+                  stroke="#aaa"
+                />
+                <YAxis 
+                  type="category" 
+                  dataKey="recipient" 
+                  stroke="#aaa"
+                  tickFormatter={(value) => value.length > 25 ? value.substring(0, 22) + '...' : value}
+                />
+                <Tooltip 
+                  content={(props) => <CustomTooltip {...props} />}
+                  formatter={(value) => [`${value} Programs`, "Programs Used"]}
+                  labelFormatter={(value) => `Recipient: ${value}`}
+                />
+                <Bar 
+                  dataKey="count" 
+                  name="Number of Grant Programs" 
+                  fill="#3b82f6"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
