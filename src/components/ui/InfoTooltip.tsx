@@ -26,26 +26,28 @@ const InfoTooltip = ({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <Tooltip open={isOpen} onOpenChange={setIsOpen}>
-      <TooltipTrigger asChild>
-        <span 
-          className={`inline-flex cursor-help ${className}`}
-          onMouseEnter={() => setIsOpen(true)}
-          onMouseLeave={() => setIsOpen(false)}
-          onClick={() => setIsOpen(!isOpen)}
+    <TooltipProvider>
+      <Tooltip open={isOpen} onOpenChange={setIsOpen}>
+        <TooltipTrigger asChild>
+          <span 
+            className={`inline-flex cursor-help ${className}`}
+            onMouseEnter={() => setIsOpen(true)}
+            onMouseLeave={() => setIsOpen(false)}
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {icon}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent 
+          className="bg-gray-800 border-gray-700 text-gray-200 p-4 max-w-xs shadow-xl"
+          sideOffset={5}
+          side={side}
+          align={align}
         >
-          {icon}
-        </span>
-      </TooltipTrigger>
-      <TooltipContent 
-        className="bg-gray-800 border-gray-700 text-gray-200 p-4 max-w-xs shadow-xl"
-        sideOffset={5}
-        side={side}
-        align={align}
-      >
-        {content}
-      </TooltipContent>
-    </Tooltip>
+          {content}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 

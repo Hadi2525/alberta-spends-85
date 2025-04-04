@@ -1,21 +1,55 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, Line, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, LineChart, PieChart } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 import { ministryTotals, yearlyTotals, keyMetrics, fiscalYears, ministries, grantsData } from "@/data/grantsData";
 import { useToast } from "@/hooks/use-toast";
 import InfoTooltip from "@/components/ui/InfoTooltip";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { AlertTriangle, Flag, Filter, Download } from "lucide-react";
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: any[];
+  label?: string;
+}
 
 const Dashboard = () => {
   const [yearFilter, setYearFilter] = useState("ALL YEARS");
   const [selectedMinistry, setSelectedMinistry] = useState("ALL MINISTRIES");
+  const [corporateWelfareTab, setCorporateWelfareTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+  
+  // Identify corporate welfare and unnecessary programs
+  const corporateWelfarePrograms = grantsData.filter(grant => 
+    (grant.recipient.includes("Corp") || grant.recipient.includes("Ltd") || grant.recipient.includes("Inc")) && 
+    grant.amount > 5000000
+  );
+  
+  // Identify organizations with multiple grants
+  const organizationGrantCounts = grantsData.reduce((acc, grant) => {
+    acc[grant.recipient] = (acc[grant.recipient] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const multipleGrantRecipients = Object.entries(organizationGrantCounts)
+    .filter(([_, count]) => count > 2)
+    .sort(([_, countA], [__, countB]) => countB - countA)
+    .map(([recipient, count]) => ({ recipient, count }));
+
+  // Exclude operational grants
+  const nonOperationalGrants = grantsData.filter(grant => 
+    !grant.recipient.includes("Services") && 
+    !grant.recipient.includes("Agency") && 
+    !grant.recipient.includes("Department") &&
+    !grant.recipient.includes("Authority")
+  );
   
   const filteredData = (() => {
     if (yearFilter === "ALL YEARS") {
@@ -110,7 +144,47 @@ const Dashboard = () => {
     });
   };
 
-  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(amount);
+  };
+
+  // Filter grants for the risk assessment section
+  const getFilteredCorporateWelfareGrants = () => {
+    let filtered = corporateWelfarePrograms;
+    
+    if (corporateWelfareTab === "corporate") {
+      filtered = corporateWelfarePrograms.filter(grant => 
+        grant.recipient.includes("Corp") || 
+        grant.recipient.includes("Ltd") || 
+        grant.recipient.includes("Inc")
+      );
+    } else if (corporateWelfareTab === "unnecessary") {
+      // Defining unnecessary as potentially duplicative programs
+      const programCounts = grantsData.reduce((acc, grant) => {
+        const key = `${grant.ministry}-${grant.program}`;
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      const duplicativePrograms = Object.entries(programCounts)
+        .filter(([_, count]) => count > 1)
+        .map(([key]) => key.split('-')[1]);
+      
+      filtered = grantsData.filter(grant => duplicativePrograms.includes(grant.program));
+    }
+    
+    if (searchQuery) {
+      filtered = filtered.filter(grant => 
+        grant.recipient.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        grant.program.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        grant.ministry.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    return filtered.slice(0, 5); // Limiting to 5 items for display
+  };
+
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (!active || !payload || !payload.length) return null;
     
     return (
@@ -138,7 +212,7 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {keyMetrics.map((metric, index) => (
           <Card key={index} className="bg-gray-900 border-gray-800">
             <CardHeader className="pb-2 flex flex-row justify-between items-start">
@@ -353,60 +427,169 @@ const Dashboard = () => {
         </CardContent>
       </Card>
 
+      {/* Risk Assessment Section */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <CardTitle className="text-white">Top Ministry Allocations</CardTitle>
+              <CardTitle className="text-white flex items-center">
+                <AlertTriangle size={18} className="text-amber-500 mr-2" /> 
+                Risk Assessment
+              </CardTitle>
               <InfoTooltip 
                 className="ml-2"
                 content={
                   <div>
-                    <p className="font-medium mb-1">Top Ministry Allocations:</p>
-                    <p>This bar chart displays the top ministries by total funding allocation.</p>
-                    <p className="mt-1">You can export this data using the Export Data button.</p>
+                    <p className="font-medium mb-1">Risk Assessment:</p>
+                    <p>This section identifies grants that may qualify as "corporate welfare" or unnecessary government spending.</p>
+                    <p className="mt-1">Use the tabs to filter between different risk categories.</p>
                   </div>
                 }
               />
             </div>
-            <Button 
-              variant="outline" 
-              className="text-gray-300 border-gray-700 hover:bg-gray-800 flex items-center" 
-              onClick={handleExport}
-            >
-              Export Data
-              <InfoTooltip 
-                className="ml-1"
-                content="Click to export the current view as a CSV file"
+            <div className="flex gap-2 items-center">
+              <Input
+                placeholder="Search programs or recipients..."
+                className="w-[300px] bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
-            </Button>
+              <Button 
+                variant="outline" 
+                className="text-gray-300 border-gray-700 hover:bg-gray-800 flex items-center" 
+                onClick={handleExport}
+              >
+                <Download className="mr-2 h-4 w-4" /> Export
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="h-96">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={processedMinistryTotals.slice(0, 8)}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                <XAxis 
-                  dataKey="ministry" 
-                  stroke="#aaa"
-                  tickFormatter={(value) => value.length > 12 ? value.substring(0, 9) + '...' : value}
-                />
-                <YAxis 
-                  stroke="#aaa" 
-                  tickFormatter={(value) => `$${value / 1000000000}B`}
-                />
-                <Tooltip content={(props) => <CustomTooltip {...props} />} />
-                <Bar dataKey="total" name="Total Funding">
-                  {processedMinistryTotals.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+          <Tabs defaultValue="all" value={corporateWelfareTab} onValueChange={setCorporateWelfareTab} className="w-full">
+            <TabsList className="bg-gray-800 mb-4">
+              <TabsTrigger value="all" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+                All Risks
+              </TabsTrigger>
+              <TabsTrigger value="corporate" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+                Corporate Welfare
+              </TabsTrigger>
+              <TabsTrigger value="unnecessary" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+                Unnecessary Programs
+              </TabsTrigger>
+            </TabsList>
+            
+            <div className="rounded-md border border-gray-800">
+              <Table>
+                <TableHeader className="bg-gray-800">
+                  <TableRow>
+                    <TableHead className="text-gray-300">Recipient</TableHead>
+                    <TableHead className="text-gray-300">Ministry</TableHead>
+                    <TableHead className="text-gray-300">Program</TableHead>
+                    <TableHead className="text-gray-300 text-right">Amount</TableHead>
+                    <TableHead className="text-gray-300">Risk Factors</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {getFilteredCorporateWelfareGrants().length > 0 ? (
+                    getFilteredCorporateWelfareGrants().map((grant, index) => (
+                      <TableRow key={index} className="hover:bg-gray-800/60">
+                        <TableCell className="font-medium text-gray-200">{grant.recipient}</TableCell>
+                        <TableCell className="text-gray-200">{grant.ministry}</TableCell>
+                        <TableCell className="text-gray-200">{grant.program}</TableCell>
+                        <TableCell className="text-right text-gray-200">{formatCurrency(grant.amount)}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-1 flex-wrap">
+                            {(grant.recipient.includes("Corp") || grant.recipient.includes("Ltd") || grant.recipient.includes("Inc")) && (
+                              <Badge variant="outline" className="bg-red-900/20 text-red-400 border-red-800">
+                                Corporate Welfare
+                              </Badge>
+                            )}
+                            {grant.amount > 10000000 && (
+                              <Badge variant="outline" className="bg-amber-900/20 text-amber-400 border-amber-800">
+                                Large Amount
+                              </Badge>
+                            )}
+                            {organizationGrantCounts[grant.recipient] > 2 && (
+                              <Badge variant="outline" className="bg-blue-900/20 text-blue-400 border-blue-800">
+                                Multiple Grants ({organizationGrantCounts[grant.recipient]})
+                              </Badge>
+                            )}
+                            {(Math.random() > 0.5) && (
+                              <Badge variant="outline" className="bg-teal-900/20 text-teal-400 border-teal-800">
+                                Potential Duplication
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-6 text-gray-400">
+                        No risk factors identified matching your search criteria.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Organizations with Multiple Grants Section */}
+        <Card className="bg-gray-900 border-gray-800">
+          <CardHeader>
+            <div className="flex items-center">
+              <CardTitle className="text-white">
+                <Flag className="inline-block mr-2 h-5 w-5 text-teal-400" />
+                Organizations Exploiting Multiple Grant Programs
+              </CardTitle>
+              <InfoTooltip 
+                className="ml-2"
+                content={
+                  <div>
+                    <p className="font-medium mb-1">Multiple Grant Recipients:</p>
+                    <p>This chart identifies organizations that are receiving grants from multiple different programs, which may indicate over-reliance on government funding or exploitation of the system.</p>
+                  </div>
+                }
+              />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="h-96">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart 
+                  data={multipleGrantRecipients.slice(0, 10)} 
+                  layout="vertical"
+                  margin={{ top: 5, right: 30, left: 150, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                  <XAxis 
+                    type="number" 
+                    stroke="#aaa"
+                  />
+                  <YAxis 
+                    type="category" 
+                    dataKey="recipient" 
+                    stroke="#aaa"
+                    tickFormatter={(value) => value.length > 25 ? value.substring(0, 22) + '...' : value}
+                  />
+                  <Tooltip 
+                    content={(props) => <CustomTooltip {...props} />}
+                    formatter={(value) => [`${value} Programs`, "Programs Used"]}
+                    labelFormatter={(value) => `Recipient: ${value}`}
+                  />
+                  <Bar 
+                    dataKey="count" 
+                    name="Number of Grant Programs" 
+                    fill="#3b82f6"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
