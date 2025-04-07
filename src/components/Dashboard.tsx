@@ -689,7 +689,9 @@ const Dashboard = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <DataQualityCard 
-          issues={dataQualityIssues}
+          totalRecords={1400}
+          issuesCount={318}
+          issuesByField={dataQualityIssues}
           flaggedItemsCount={reviewListItems.length}
         />
       </div>

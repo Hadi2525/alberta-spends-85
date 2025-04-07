@@ -13,15 +13,17 @@ interface DataQualityIssue {
 }
 
 interface DataQualityCardProps {
-  totalRecords: number;
-  issuesCount: number;
+  totalRecords?: number;
+  issuesCount?: number;
   issuesByField: DataQualityIssue[];
+  flaggedItemsCount?: number;
 }
 
 const DataQualityCard = ({ 
-  totalRecords, 
-  issuesCount, 
-  issuesByField 
+  totalRecords = 1400, 
+  issuesCount = 318, 
+  issuesByField,
+  flaggedItemsCount = 0
 }: DataQualityCardProps) => {
   const issuePercentage = (issuesCount / totalRecords) * 100;
   const hasWarning = issuePercentage > 10;
