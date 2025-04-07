@@ -82,7 +82,7 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [visualizationTab, setVisualizationTab] = useState("ministry");
   const [reviewListItems, setReviewListItems] = useState<any[]>([]);
-  const [isFilterExpanded, setIsFilterExpanded] = useState(false);
+  const [isFilterExpanded, setIsFilterExpanded] = useState(true); // Always expanded
   const [viewMode, setViewMode] = useState("dashboard");
   const { toast } = useToast();
 
@@ -161,6 +161,13 @@ const Dashboard = () => {
     notation: 'compact',
     compactDisplay: 'long'
   }).format(currentYearTotal);
+
+  // Generate ministry grant data when selectedMinistry changes
+  useEffect(() => {
+    if (selectedMinistry !== "ALL MINISTRIES") {
+      console.log("Generating data for ministry:", selectedMinistry);
+    }
+  }, [selectedMinistry]);
 
   const generateMinistryGrantData = (ministry) => {
     if (ministry === "ALL MINISTRIES") {
@@ -274,6 +281,11 @@ const Dashboard = () => {
     
     if (!reviewListItems.some(existingItem => existingItem.id === newReviewItem.id)) {
       setReviewListItems(prev => [...prev, newReviewItem]);
+      
+      toast({
+        title: "Added to Review List",
+        description: `${recipient.name} has been added to the review list for further analysis.`,
+      });
     }
   };
 
@@ -319,7 +331,7 @@ const Dashboard = () => {
           <h2 className="text-xl font-bold text-white">Review List</h2>
           <Button 
             variant="outline" 
-            className="text-gray-300 border-gray-700 hover:bg-gray-800"
+            className="text-white border-gray-700 hover:bg-gray-800"
             onClick={() => setViewMode("dashboard")}
           >
             Back to Dashboard
@@ -398,14 +410,14 @@ const Dashboard = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                className="text-gray-300 border-gray-700 hover:bg-gray-800 flex items-center gap-1"
+                className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700 flex items-center gap-1"
                 onClick={() => setViewMode("review-list")}
               >
                 <Flag className="h-4 w-4" /> View Review List ({reviewListItems.length})
               </Button>
               <Button 
                 variant="outline" 
-                className="text-gray-300 border-gray-700 hover:bg-gray-800 flex items-center"
+                className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700 flex items-center"
                 onClick={handleExport}
               >
                 <Download className="mr-2 h-4 w-4" /> Export Data
@@ -585,6 +597,7 @@ const Dashboard = () => {
               </div>
             </TabsContent>
             
+            
             <TabsContent value="trends">
               <div className="h-96">
                 <div className="flex justify-between items-center mb-3">
@@ -628,261 +641,4 @@ const Dashboard = () => {
                       dataKey="recipientCount" 
                       stroke="#3b82f6" 
                       strokeWidth={2}
-                      dot={{ fill: '#3b82f6', r: 4 }}
-                      activeDot={{ r: 8 }}
-                      name="Recipient Count"
-                    />
-                    <Line 
-                      yAxisId="left"
-                      type="monotone" 
-                      dataKey="averageGrant" 
-                      stroke="#a855f7" 
-                      strokeWidth={2}
-                      dot={{ fill: '#a855f7', r: 4 }}
-                      activeDot={{ r: 8 }}
-                      name="Average Grant"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-
-      <DataQualityCard
-        totalRecords={1400}
-        issuesCount={187}
-        issuesByField={dataQualityIssues}
-      />
-
-      <TopRecipientsTable
-        title="Top Recipients by Program Count"
-        subtitle="Organizations receiving grants from multiple different programs, potentially indicating over-reliance on government funding."
-        recipients={topRecipientsByProgramCount}
-        type="programCount"
-        onFlagRecipient={handleFlagRecipient}
-        addToReviewList={addToReviewList}
-        flagButtonStyle={flagButtonStyle}
-        flaggedButtonStyle={flaggedButtonStyle}
-      />
-
-      <TopRecipientsTable
-        title="Top Recipients by Amount"
-        subtitle="Organizations receiving the largest total grant amounts across all programs."
-        recipients={topRecipientsByAmount}
-        type="amount"
-        onFlagRecipient={handleFlagRecipient}
-        addToReviewList={addToReviewList}
-        flagButtonStyle={flagButtonStyle}
-        flaggedButtonStyle={flaggedButtonStyle}
-      />
-      
-      <Card className="bg-gray-900 border-gray-800">
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <CardTitle className="text-white flex items-center">
-                <AlertTriangle size={18} className="text-amber-500 mr-2" /> 
-                Risk Assessment
-              </CardTitle>
-              <InfoTooltip 
-                className="ml-2"
-                content={
-                  <div>
-                    <p className="font-medium mb-1">Risk Assessment:</p>
-                    <p>This section identifies grants that may qualify as "corporate welfare" or unnecessary government spending.</p>
-                    <p className="mt-1">Use the tabs to filter between different risk categories and search for specific recipients or programs.</p>
-                  </div>
-                }
-              />
-            </div>
-            <div className="flex gap-2 items-center">
-              <Input
-                placeholder="Search programs or recipients..."
-                className="w-[300px] bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <Button 
-                variant="outline" 
-                className="text-gray-300 border-gray-700 hover:bg-gray-800 flex items-center" 
-                onClick={handleExport}
-              >
-                <Download className="mr-2 h-4 w-4" /> Export
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4 border border-amber-800/30 bg-amber-950/30 p-3 rounded-md text-amber-200">
-            <p className="text-sm flex items-start">
-              <AlertTriangle className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-              <span>
-                <strong>What this section shows:</strong> The Risk Assessment section identifies grants that may need review based on specific criteria. 
-                Use the tabs below to filter by risk type and the search box to find specific programs or recipients. 
-                Each entry is categorized with risk factors that indicate potential issues.
-              </span>
-            </p>
-          </div>
-          
-          <Tabs defaultValue="all" value={corporateWelfareTab} onValueChange={setCorporateWelfareTab} className="w-full">
-            <TabsList className="bg-gray-800 mb-4">
-              <TabsTrigger value="all" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white">
-                All Risks
-              </TabsTrigger>
-              <TabsTrigger value="corporate" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white">
-                Corporate Welfare
-              </TabsTrigger>
-              <TabsTrigger value="unnecessary" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white">
-                Unnecessary Programs
-              </TabsTrigger>
-            </TabsList>
-            
-            <div className="rounded-md border border-gray-800">
-              <Table>
-                <TableHeader className="bg-gray-800">
-                  <TableRow>
-                    <TableHead className="text-gray-300">Recipient</TableHead>
-                    <TableHead className="text-gray-300">Ministry</TableHead>
-                    <TableHead className="text-gray-300">Program</TableHead>
-                    <TableHead className="text-gray-300 text-right">Amount</TableHead>
-                    <TableHead className="text-gray-300">Risk Factors</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {getFilteredCorporateWelfareGrants().length > 0 ? (
-                    getFilteredCorporateWelfareGrants().map((grant, index) => (
-                      <TableRow key={index} className="hover:bg-gray-800/60">
-                        <TableCell className="font-medium text-gray-200">{grant.recipient}</TableCell>
-                        <TableCell className="text-gray-200">{grant.ministry}</TableCell>
-                        <TableCell className="text-gray-200">{grant.program}</TableCell>
-                        <TableCell className="text-right text-gray-200">{formatCurrency(grant.amount)}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-1 flex-wrap">
-                            {(grant.recipient.includes("Corp") || grant.recipient.includes("Ltd") || grant.recipient.includes("Inc")) && (
-                              <Badge variant="outline" className="bg-red-900/20 text-red-400 border-red-800">
-                                Corporate Welfare
-                              </Badge>
-                            )}
-                            {grant.amount > 10000000 && (
-                              <Badge variant="outline" className="bg-amber-900/20 text-amber-400 border-amber-800">
-                                Large Amount
-                              </Badge>
-                            )}
-                            {organizationGrantCounts[grant.recipient] > 2 && (
-                              <Badge variant="outline" className="bg-blue-900/20 text-blue-400 border-blue-800">
-                                Multiple Grants ({organizationGrantCounts[grant.recipient]})
-                              </Badge>
-                            )}
-                            {(Math.random() > 0.5) && (
-                              <Badge variant="outline" className="bg-teal-900/20 text-teal-400 border-teal-800">
-                                Potential Duplication
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-6 text-gray-400">
-                        No risk factors identified matching your search criteria.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </Tabs>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-gray-900 border-gray-800">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <CardTitle className="text-white">
-                <Flag className="inline-block mr-2 h-5 w-5 text-teal-400" />
-                Organizations Exploiting Multiple Grant Programs
-              </CardTitle>
-              <InfoTooltip 
-                className="ml-2"
-                content={
-                  <div>
-                    <p className="font-medium mb-1">Multiple Grant Recipients:</p>
-                    <p>This chart identifies organizations that are receiving grants from multiple different programs, which may indicate over-reliance on government funding or exploitation of the system.</p>
-                  </div>
-                }
-              />
-            </div>
-            <Button 
-              variant="outline"
-              size="sm"
-              className="text-white border-gray-700 hover:bg-gray-800"
-              onClick={() => toast({
-                title: "Analysis Updated",
-                description: "The multiple grants analysis has been refreshed with the latest data."
-              })}
-            >
-              Refresh Analysis
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4 border border-teal-800/30 bg-teal-950/30 p-3 rounded-md text-teal-200">
-            <p className="text-sm flex items-start">
-              <Flag className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-              <span>
-                <strong>What this section shows:</strong> This visualization highlights organizations receiving grants from multiple programs, 
-                potentially indicating systematic exploitation of government funding. Each bar represents the number of different grant 
-                programs a single organization is participating in. Organizations with unusually high program counts may warrant review.
-              </span>
-            </p>
-          </div>
-          
-          <div className="h-96">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart 
-                data={multipleGrantRecipients.slice(0, 10)} 
-                layout="vertical"
-                margin={{ top: 5, right: 30, left: 150, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                <XAxis 
-                  type="number" 
-                  stroke="#aaa"
-                />
-                <YAxis 
-                  type="category" 
-                  dataKey="recipient" 
-                  stroke="#aaa"
-                  tickFormatter={(value) => value.length > 25 ? value.substring(0, 22) + '...' : value}
-                />
-                <Tooltip 
-                  content={(props) => <CustomTooltip {...props} />}
-                  formatter={(value) => [`${value} Programs`, "Programs Used"]}
-                  labelFormatter={(value) => `Recipient: ${value}`}
-                />
-                <Bar 
-                  dataKey="count" 
-                  name="Number of Grant Programs" 
-                  fill="#3b82f6"
-                >
-                  {multipleGrantRecipients.slice(0, 10).map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`}
-                      fill={entry.count >= 5 ? "#ef4444" : "#3b82f6"}
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
-export default Dashboard;
+                      dot={{ fill: '#3b8

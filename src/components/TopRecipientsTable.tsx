@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import InfoTooltip from "@/components/ui/InfoTooltip";
-import { Flag } from "lucide-react";
+import { Flag, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Recipient {
@@ -128,10 +128,10 @@ const TopRecipientsTable = ({
                   {recipient.isFlagged ? (
                     <Button 
                       size="sm" 
-                      className={flaggedButtonStyle}
+                      className="bg-green-600 hover:bg-green-700 text-white"
                       onClick={() => handleRemoveFlag(recipient, recipient.id)}
                     >
-                      <Flag className="mr-1 h-4 w-4" /> Flagged
+                      <CheckCircle className="mr-1 h-4 w-4" /> Submitted for Review
                     </Button>
                   ) : (
                     <Button 
