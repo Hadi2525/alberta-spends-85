@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import InfoTooltip from "@/components/ui/InfoTooltip";
 import { Flag } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface Recipient {
   id: string;
@@ -35,9 +36,10 @@ const TopRecipientsTable = ({
   type, 
   onFlagRecipient, 
   addToReviewList,
-  flagButtonStyle = "bg-blue-600 hover:bg-blue-700 text-white",
+  flagButtonStyle = "bg-amber-600 hover:bg-amber-700 text-white",
   flaggedButtonStyle = "bg-red-600 hover:bg-red-700 text-white" 
 }: TopRecipientsTableProps) => {
+  const { toast } = useToast();
   
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(amount);
@@ -46,6 +48,20 @@ const TopRecipientsTable = ({
   const handleAddToReview = (recipient: Recipient) => {
     addToReviewList(recipient);
     onFlagRecipient(recipient.id, true);
+    
+    toast({
+      title: "Recipient Flagged",
+      description: `${recipient.name} has been added to your review list.`,
+    });
+  };
+
+  const handleRemoveFlag = (recipient: Recipient, id: string) => {
+    onFlagRecipient(id, false);
+    
+    toast({
+      title: "Flag Removed",
+      description: `${recipient.name} has been removed from your review list.`,
+    });
   };
 
   return (
@@ -113,7 +129,7 @@ const TopRecipientsTable = ({
                     <Button 
                       size="sm" 
                       className={flaggedButtonStyle}
-                      onClick={() => onFlagRecipient(recipient.id, false)}
+                      onClick={() => handleRemoveFlag(recipient, recipient.id)}
                     >
                       <Flag className="mr-1 h-4 w-4" /> Flagged
                     </Button>

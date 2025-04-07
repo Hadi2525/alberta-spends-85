@@ -22,7 +22,6 @@ interface CustomTooltipProps {
   label?: string;
 }
 
-// Sample data for data quality
 const dataQualityIssues = [
   { field: "Recipient Name", issueCount: 45, percentage: 3.2 },
   { field: "Ministry", issueCount: 12, percentage: 0.8 },
@@ -32,7 +31,6 @@ const dataQualityIssues = [
   { field: "Fiscal Year", issueCount: 8, percentage: 0.6 }
 ];
 
-// Mock top recipients by amount
 const topRecipientsByAmount = [
   { id: "1", name: "Alberta Health Services", totalAmount: 25000000, grantCount: 3, isFlagged: false, riskFactors: ["Operational Grant"] },
   { id: "2", name: "University of Alberta", totalAmount: 18500000, grantCount: 8, isFlagged: false, riskFactors: ["Multiple Programs"] },
@@ -46,7 +44,6 @@ const topRecipientsByAmount = [
   { id: "10", name: "Alberta Innovates", totalAmount: 5900000, grantCount: 4, isFlagged: false, riskFactors: [] }
 ];
 
-// Mock top recipients by program count
 const topRecipientsByProgramCount = [
   { id: "11", name: "University of Alberta", programCount: 8, totalAmount: 18500000, isFlagged: false, riskFactors: ["Multiple Programs", "High Program Count"] },
   { id: "12", name: "University of Calgary", programCount: 6, totalAmount: 8500000, isFlagged: false, riskFactors: ["Multiple Programs", "High Program Count"] },
@@ -60,18 +57,16 @@ const topRecipientsByProgramCount = [
   { id: "20", name: "SAIT", programCount: 3, totalAmount: 2200000, isFlagged: false, riskFactors: [] }
 ];
 
-// Sample program spending data - fixing the color values to make it more visible
 const programSpendingData = [
-  { name: "Healthcare Infrastructure", value: 32500000, color: "#4338ca" }, // Indigo-700
-  { name: "Education Grants", value: 26800000, color: "#6d28d9" }, // Purple-700
-  { name: "Municipal Support", value: 19300000, color: "#a21caf" }, // Fuchsia-700
-  { name: "Energy Innovation", value: 15700000, color: "#db2777" }, // Pink-600
-  { name: "Transportation", value: 12400000, color: "#e11d48" }, // Rose-600
-  { name: "Environmental Protection", value: 10800000, color: "#0891b2" }, // Cyan-600
-  { name: "Other Programs", value: 42500000, color: "#4b5563" } // Gray-600
+  { name: "Healthcare Infrastructure", value: 32500000, color: "#4338ca" },
+  { name: "Education Grants", value: 26800000, color: "#6d28d9" },
+  { name: "Municipal Support", value: 19300000, color: "#a21caf" },
+  { name: "Energy Innovation", value: 15700000, color: "#db2777" },
+  { name: "Transportation", value: 12400000, color: "#e11d48" },
+  { name: "Environmental Protection", value: 10800000, color: "#0891b2" },
+  { name: "Other Programs", value: 42500000, color: "#4b5563" }
 ];
 
-// Mock data for spending trends
 const spendingTrendsData = [
   { year: "2019-2020", totalSpending: 32000000, recipientCount: 120, averageGrant: 266667 },
   { year: "2020-2021", totalSpending: 45000000, recipientCount: 150, averageGrant: 300000 },
@@ -91,7 +86,6 @@ const Dashboard = () => {
   const [viewMode, setViewMode] = useState("dashboard");
   const { toast } = useToast();
 
-  // Dashboard filters state
   const [activeFilters, setActiveFilters] = useState({
     years: ["ALL YEARS"],
     ministries: ["ALL MINISTRIES"],
@@ -100,13 +94,11 @@ const Dashboard = () => {
     excludeOperational: false
   });
 
-  // Identify corporate welfare and unnecessary programs
   const corporateWelfarePrograms = grantsData.filter(grant => 
     (grant.recipient.includes("Corp") || grant.recipient.includes("Ltd") || grant.recipient.includes("Inc")) && 
     grant.amount > 5000000
   );
-  
-  // Identify organizations with multiple grants
+
   const organizationGrantCounts = grantsData.reduce((acc, grant) => {
     acc[grant.recipient] = (acc[grant.recipient] || 0) + 1;
     return acc;
@@ -117,14 +109,13 @@ const Dashboard = () => {
     .sort(([_, countA], [__, countB]) => countB - countA)
     .map(([recipient, count]) => ({ recipient, count }));
 
-  // Exclude operational grants
   const nonOperationalGrants = grantsData.filter(grant => 
     !grant.recipient.includes("Services") && 
     !grant.recipient.includes("Agency") && 
     !grant.recipient.includes("Department") &&
     !grant.recipient.includes("Authority")
   );
-  
+
   const filteredData = (() => {
     if (yearFilter === "ALL YEARS") {
       return ministryTotals;
@@ -222,7 +213,6 @@ const Dashboard = () => {
     return new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(amount);
   };
 
-  // Filter grants for the risk assessment section
   const getFilteredCorporateWelfareGrants = () => {
     let filtered = corporateWelfarePrograms;
     
@@ -233,7 +223,6 @@ const Dashboard = () => {
         grant.recipient.includes("Inc")
       );
     } else if (corporateWelfareTab === "unnecessary") {
-      // Defining unnecessary as potentially duplicative programs
       const programCounts = grantsData.reduce((acc, grant) => {
         const key = `${grant.ministry}-${grant.program}`;
         acc[key] = (acc[key] || 0) + 1;
@@ -255,23 +244,19 @@ const Dashboard = () => {
       );
     }
     
-    return filtered.slice(0, 5); // Limiting to 5 items for display
+    return filtered.slice(0, 5);
   };
 
-  // Handler for flagging a recipient
   const handleFlagRecipient = (id: string, flag: boolean) => {
-    // Update topRecipientsByAmount
     const updatedTopByAmount = topRecipientsByAmount.map(recipient => 
       recipient.id === id ? { ...recipient, isFlagged: flag } : recipient
     );
     
-    // Update topRecipientsByProgramCount
     const updatedTopByProgramCount = topRecipientsByProgramCount.map(recipient => 
       recipient.id === id ? { ...recipient, isFlagged: flag } : recipient
     );
   };
 
-  // Handler for adding an item to the review list
   const addToReviewList = (item: any) => {
     const recipient = item.programCount 
       ? { ...item, type: 'recipient' } 
@@ -287,17 +272,14 @@ const Dashboard = () => {
       dateAdded: new Date()
     };
     
-    // Check if the item is already in the review list
     if (!reviewListItems.some(existingItem => existingItem.id === newReviewItem.id)) {
       setReviewListItems(prev => [...prev, newReviewItem]);
     }
   };
-  
-  // Handler for removing an item from the review list
+
   const removeFromReviewList = (id: string) => {
     setReviewListItems(prev => prev.filter(item => item.id !== id));
     
-    // Also update the isFlagged property in the recipient lists
     handleFlagRecipient(id, false);
   };
 
@@ -330,7 +312,6 @@ const Dashboard = () => {
     );
   };
 
-  // Render the main dashboard content
   if (viewMode === "review-list") {
     return (
       <div className="space-y-6">
@@ -354,7 +335,6 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Key Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {keyMetrics.map((metric, index) => (
           <Card key={index} className="bg-gray-900 border-gray-800">
@@ -377,7 +357,6 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Dashboard Filters */}
       <DashboardFilters 
         activeFilters={activeFilters}
         setActiveFilters={setActiveFilters}
@@ -385,7 +364,6 @@ const Dashboard = () => {
         setIsFilterExpanded={setIsFilterExpanded}
       />
 
-      {/* Total Grant Summary */}
       <div className="text-xl font-bold border-b border-gray-800 pb-2 text-gray-100 flex items-center">
         Total Grants: {formattedTotal}
         <InfoTooltip 
@@ -400,7 +378,6 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Main Visualization Tabs */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -450,10 +427,8 @@ const Dashboard = () => {
               </TabsTrigger>
             </TabsList>
             
-            {/* Distribution Tab Content */}
             <TabsContent value="distribution">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Ministry Distribution Pie Chart */}
                 <div className="h-80">
                   <div className="flex justify-between items-center mb-3">
                     <h3 className="text-lg font-medium text-gray-100">Ministry Funding Distribution</h3>
@@ -502,7 +477,6 @@ const Dashboard = () => {
                   </ResponsiveContainer>
                 </div>
                 
-                {/* Program Distribution Pie Chart */}
                 <div className="h-80">
                   <div className="flex justify-between items-center mb-3">
                     <h3 className="text-lg font-medium text-gray-100">Program Spending Distribution</h3>
@@ -552,7 +526,6 @@ const Dashboard = () => {
               </div>
             </TabsContent>
             
-            {/* Spending By Program Tab Content */}
             <TabsContent value="spending">
               <div className="h-96">
                 <div className="flex justify-between items-center mb-3">
@@ -597,7 +570,6 @@ const Dashboard = () => {
                           <Cell 
                             key={`cell-${index}`} 
                             fill={entry.color} 
-                            // Highlight programs with unusually high spending
                             stroke={entry.value > ministryGrantData.reduce((sum, item) => sum + item.value, 0) / ministryGrantData.length * 1.5 ? "#f43f5e" : undefined}
                             strokeWidth={entry.value > ministryGrantData.reduce((sum, item) => sum + item.value, 0) / ministryGrantData.length * 1.5 ? 2 : 0}
                           />
@@ -613,7 +585,6 @@ const Dashboard = () => {
               </div>
             </TabsContent>
             
-            {/* Spending Trends Tab Content */}
             <TabsContent value="trends">
               <div className="h-96">
                 <div className="flex justify-between items-center mb-3">
@@ -679,14 +650,12 @@ const Dashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Data Quality Card */}
       <DataQualityCard
         totalRecords={1400}
         issuesCount={187}
         issuesByField={dataQualityIssues}
       />
 
-      {/* Top Recipients by Program Count */}
       <TopRecipientsTable
         title="Top Recipients by Program Count"
         subtitle="Organizations receiving grants from multiple different programs, potentially indicating over-reliance on government funding."
@@ -698,7 +667,6 @@ const Dashboard = () => {
         flaggedButtonStyle={flaggedButtonStyle}
       />
 
-      {/* Top Recipients by Amount */}
       <TopRecipientsTable
         title="Top Recipients by Amount"
         subtitle="Organizations receiving the largest total grant amounts across all programs."
@@ -710,7 +678,6 @@ const Dashboard = () => {
         flaggedButtonStyle={flaggedButtonStyle}
       />
       
-      {/* Risk Assessment Section */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -725,7 +692,7 @@ const Dashboard = () => {
                   <div>
                     <p className="font-medium mb-1">Risk Assessment:</p>
                     <p>This section identifies grants that may qualify as "corporate welfare" or unnecessary government spending.</p>
-                    <p className="mt-1">Use the tabs to filter between different risk categories.</p>
+                    <p className="mt-1">Use the tabs to filter between different risk categories and search for specific recipients or programs.</p>
                   </div>
                 }
               />
@@ -748,6 +715,17 @@ const Dashboard = () => {
           </div>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 border border-amber-800/30 bg-amber-950/30 p-3 rounded-md text-amber-200">
+            <p className="text-sm flex items-start">
+              <AlertTriangle className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+              <span>
+                <strong>What this section shows:</strong> The Risk Assessment section identifies grants that may need review based on specific criteria. 
+                Use the tabs below to filter by risk type and the search box to find specific programs or recipients. 
+                Each entry is categorized with risk factors that indicate potential issues.
+              </span>
+            </p>
+          </div>
+          
           <Tabs defaultValue="all" value={corporateWelfareTab} onValueChange={setCorporateWelfareTab} className="w-full">
             <TabsList className="bg-gray-800 mb-4">
               <TabsTrigger value="all" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white">
@@ -820,26 +798,49 @@ const Dashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Organizations with Multiple Grants Section */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
-          <div className="flex items-center">
-            <CardTitle className="text-white">
-              <Flag className="inline-block mr-2 h-5 w-5 text-teal-400" />
-              Organizations Exploiting Multiple Grant Programs
-            </CardTitle>
-            <InfoTooltip 
-              className="ml-2"
-              content={
-                <div>
-                  <p className="font-medium mb-1">Multiple Grant Recipients:</p>
-                  <p>This chart identifies organizations that are receiving grants from multiple different programs, which may indicate over-reliance on government funding or exploitation of the system.</p>
-                </div>
-              }
-            />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <CardTitle className="text-white">
+                <Flag className="inline-block mr-2 h-5 w-5 text-teal-400" />
+                Organizations Exploiting Multiple Grant Programs
+              </CardTitle>
+              <InfoTooltip 
+                className="ml-2"
+                content={
+                  <div>
+                    <p className="font-medium mb-1">Multiple Grant Recipients:</p>
+                    <p>This chart identifies organizations that are receiving grants from multiple different programs, which may indicate over-reliance on government funding or exploitation of the system.</p>
+                  </div>
+                }
+              />
+            </div>
+            <Button 
+              variant="outline"
+              size="sm"
+              className="text-white border-gray-700 hover:bg-gray-800"
+              onClick={() => toast({
+                title: "Analysis Updated",
+                description: "The multiple grants analysis has been refreshed with the latest data."
+              })}
+            >
+              Refresh Analysis
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 border border-teal-800/30 bg-teal-950/30 p-3 rounded-md text-teal-200">
+            <p className="text-sm flex items-start">
+              <Flag className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+              <span>
+                <strong>What this section shows:</strong> This visualization highlights organizations receiving grants from multiple programs, 
+                potentially indicating systematic exploitation of government funding. Each bar represents the number of different grant 
+                programs a single organization is participating in. Organizations with unusually high program counts may warrant review.
+              </span>
+            </p>
+          </div>
+          
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart 
@@ -867,7 +868,14 @@ const Dashboard = () => {
                   dataKey="count" 
                   name="Number of Grant Programs" 
                   fill="#3b82f6"
-                />
+                >
+                  {multipleGrantRecipients.slice(0, 10).map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`}
+                      fill={entry.count >= 5 ? "#ef4444" : "#3b82f6"}
+                    />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
