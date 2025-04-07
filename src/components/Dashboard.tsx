@@ -60,15 +60,15 @@ const topRecipientsByProgramCount = [
   { id: "20", name: "SAIT", programCount: 3, totalAmount: 2200000, isFlagged: false, riskFactors: [] }
 ];
 
-// Sample program spending data
+// Sample program spending data - fixing the color values to make it more visible
 const programSpendingData = [
-  { name: "Healthcare Infrastructure", value: 32500000, color: "#4f46e5" },
-  { name: "Education Grants", value: 26800000, color: "#8b5cf6" },
-  { name: "Municipal Support", value: 19300000, color: "#d946ef" },
-  { name: "Energy Innovation", value: 15700000, color: "#ec4899" },
-  { name: "Transportation", value: 12400000, color: "#f43f5e" },
-  { name: "Environmental Protection", value: 10800000, color: "#06b6d4" },
-  { name: "Other Programs", value: 42500000, color: "#6b7280" }
+  { name: "Healthcare Infrastructure", value: 32500000, color: "#4338ca" }, // Indigo-700
+  { name: "Education Grants", value: 26800000, color: "#6d28d9" }, // Purple-700
+  { name: "Municipal Support", value: 19300000, color: "#a21caf" }, // Fuchsia-700
+  { name: "Energy Innovation", value: 15700000, color: "#db2777" }, // Pink-600
+  { name: "Transportation", value: 12400000, color: "#e11d48" }, // Rose-600
+  { name: "Environmental Protection", value: 10800000, color: "#0891b2" }, // Cyan-600
+  { name: "Other Programs", value: 42500000, color: "#4b5563" } // Gray-600
 ];
 
 // Mock data for spending trends
@@ -301,6 +301,9 @@ const Dashboard = () => {
     handleFlagRecipient(id, false);
   };
 
+  const flagButtonStyle = "bg-amber-600 hover:bg-amber-700 text-white";
+  const flaggedButtonStyle = "bg-red-600 hover:bg-red-700 text-white";
+
   const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (!active || !payload || !payload.length) return null;
     
@@ -524,10 +527,11 @@ const Dashboard = () => {
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
-                        nameKey="name"
-                        label={({ name, percent }) => 
-                          `${name.length > 15 ? name.substring(0, 12) + '...' : name}: ${(percent * 100).toFixed(0)}%`
-                        }
+                        nameKey={visualizationTab === "ministry" ? "ministry" : "name"}
+                        label={({ name, ministry, percent }) => {
+                          const label = visualizationTab === "ministry" ? ministry : name;
+                          return `${label && label.length > 15 ? label.substring(0, 12) + '...' : label}: ${(percent * 100).toFixed(0)}%`;
+                        }}
                       >
                         {(visualizationTab === "ministry" ? processedMinistryTotals : programSpendingData).map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
@@ -690,6 +694,8 @@ const Dashboard = () => {
         type="programCount"
         onFlagRecipient={handleFlagRecipient}
         addToReviewList={addToReviewList}
+        flagButtonStyle={flagButtonStyle}
+        flaggedButtonStyle={flaggedButtonStyle}
       />
 
       {/* Top Recipients by Amount */}
@@ -700,6 +706,8 @@ const Dashboard = () => {
         type="amount"
         onFlagRecipient={handleFlagRecipient}
         addToReviewList={addToReviewList}
+        flagButtonStyle={flagButtonStyle}
+        flaggedButtonStyle={flaggedButtonStyle}
       />
       
       {/* Risk Assessment Section */}
