@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, Line, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, LineChart, PieChart } from "recharts";
@@ -597,7 +598,6 @@ const Dashboard = () => {
               </div>
             </TabsContent>
             
-            
             <TabsContent value="trends">
               <div className="h-96">
                 <div className="flex justify-between items-center mb-3">
@@ -641,4 +641,60 @@ const Dashboard = () => {
                       dataKey="recipientCount" 
                       stroke="#3b82f6" 
                       strokeWidth={2}
-                      dot={{ fill: '#3b8
+                      dot={{ fill: '#3b82f6', r: 4 }}
+                      activeDot={{ r: 6 }}
+                      name="Recipient Count"
+                    />
+                    <Line 
+                      yAxisId="left"
+                      type="monotone" 
+                      dataKey="averageGrant" 
+                      stroke="#a855f7" 
+                      strokeWidth={2}
+                      dot={{ fill: '#a855f7', r: 4 }}
+                      activeDot={{ r: 6 }}
+                      name="Average Grant"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <TopRecipientsTable 
+          title="Top Recipients by Amount"
+          subtitle="Organizations that have received the largest total grant amounts"
+          recipients={topRecipientsByAmount}
+          type="amount"
+          onFlagRecipient={handleFlagRecipient}
+          addToReviewList={addToReviewList}
+          flagButtonStyle={flagButtonStyle}
+          flaggedButtonStyle={flaggedButtonStyle}
+        />
+        
+        <TopRecipientsTable 
+          title="Organizations Exploiting Multiple Grant Programs"
+          subtitle="Recipients taking advantage of multiple grant programs"
+          recipients={topRecipientsByProgramCount}
+          type="programCount"
+          onFlagRecipient={handleFlagRecipient}
+          addToReviewList={addToReviewList}
+          flagButtonStyle={flagButtonStyle}
+          flaggedButtonStyle={flaggedButtonStyle}
+        />
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <DataQualityCard 
+          issues={dataQualityIssues}
+          flaggedItemsCount={reviewListItems.length}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
