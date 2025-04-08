@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, Line, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, LineChart, PieChart } from "recharts";
@@ -624,4 +625,112 @@ const Dashboard = () => {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div
+                  <div className="flex items-center justify-center h-full text-gray-300">
+                    <p>No data available for the selected ministry</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="trends">
+              <div className="h-80">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-lg font-medium text-gray-100">Grant Spending Trends</h3>
+                </div>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={spendingTrendsData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                    <XAxis dataKey="year" stroke="#aaa" />
+                    <YAxis 
+                      stroke="#aaa"
+                      tickFormatter={(value) => `$${value / 1000000}M`}
+                    />
+                    <Tooltip content={(props) => <CustomTooltip {...props} />} />
+                    <Legend wrapperStyle={{ color: '#fff' }} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="totalSpending" 
+                      name="Total Spending"
+                      stroke="#0ea5e9" 
+                      activeDot={{ r: 8 }} 
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="recipientCount" 
+                      name="Recipient Count"
+                      stroke="#d946ef" 
+                      yAxisId={1}
+                      strokeDasharray="5 5"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      <div className="flex flex-col gap-6">
+        <Card className="bg-gray-900 border-gray-800">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-white">Top Recipients by Amount</CardTitle>
+              <InfoTooltip 
+                content={
+                  <div>
+                    <p className="font-medium mb-1">Top Recipients by Amount:</p>
+                    <p>This table shows the organizations receiving the largest total funding amounts.</p>
+                    <p className="mt-1 text-amber-300">Highlighted rows indicate potential concern areas worthy of review.</p>
+                  </div>
+                }
+              />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <TopRecipientsTable 
+              recipients={topRecipientsByAmount}
+              addToReviewList={addToReviewList}
+              reviewListItems={reviewListItems}
+              type="amount"
+            />
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gray-900 border-gray-800">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-white">Organizations Exploiting Multiple Grant Programs</CardTitle>
+              <InfoTooltip 
+                content={
+                  <div>
+                    <p className="font-medium mb-1">Multiple Program Recipients:</p>
+                    <p>Organizations receiving funding from multiple different grant programs might be overleveraging government funding.</p>
+                    <p className="mt-1 text-amber-300">High program counts may indicate excessive reliance on government funding.</p>
+                  </div>
+                }
+              />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <TopRecipientsTable 
+              recipients={topRecipientsByProgramCount}
+              addToReviewList={addToReviewList}
+              reviewListItems={reviewListItems}
+              type="programCount"
+            />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6">
+        <DataQualityCard 
+          issuesByField={dataQualityIssues}
+          corporateWelfarePrograms={corporateWelfarePrograms}
+          multipleGrantRecipients={multipleGrantRecipients}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
