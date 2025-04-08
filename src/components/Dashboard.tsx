@@ -641,6 +641,12 @@ const Dashboard = () => {
                       stroke="#aaa"
                       tickFormatter={(value) => `$${value / 1000000}M`}
                     />
+                    <YAxis 
+                      yAxisId="right"
+                      orientation="right"
+                      stroke="#d946ef"
+                      tickFormatter={(value) => `${value}`}
+                    />
                     <Tooltip content={(props) => <CustomTooltip {...props} />} />
                     <Legend wrapperStyle={{ color: '#fff' }} />
                     <Line 
@@ -655,7 +661,7 @@ const Dashboard = () => {
                       dataKey="recipientCount" 
                       name="Recipient Count"
                       stroke="#d946ef" 
-                      yAxisId={1}
+                      yAxisId="right"
                       strokeDasharray="5 5"
                     />
                   </LineChart>
