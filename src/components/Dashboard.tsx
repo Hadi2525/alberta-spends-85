@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, Line, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, LineChart, PieChart } from "recharts";
@@ -58,7 +57,6 @@ const topRecipientsByProgramCount = [
   { id: "20", name: "SAIT", programCount: 3, totalAmount: 2200000, isFlagged: false, riskFactors: [] }
 ];
 
-// Modified to better align with corporate welfare analysis
 const programSpendingData = [
   { name: "Healthcare Infrastructure", value: 32500000, color: "#4338ca", riskLevel: "low" },
   { name: "Education Grants", value: 26800000, color: "#6d28d9", riskLevel: "low" },
@@ -85,7 +83,7 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [visualizationTab, setVisualizationTab] = useState("ministry");
   const [reviewListItems, setReviewListItems] = useState<any[]>([]);
-  const [isFilterExpanded, setIsFilterExpanded] = useState(true); // Always expanded
+  const [isFilterExpanded, setIsFilterExpanded] = useState(true);
   const [viewMode, setViewMode] = useState("dashboard");
   const { toast } = useToast();
 
@@ -165,7 +163,6 @@ const Dashboard = () => {
     compactDisplay: 'long'
   }).format(currentYearTotal);
 
-  // Generate ministry grant data when selectedMinistry changes
   useEffect(() => {
     if (selectedMinistry !== "ALL MINISTRIES") {
       console.log("Generating data for ministry:", selectedMinistry);
@@ -258,7 +255,6 @@ const Dashboard = () => {
   };
 
   const handleFlagRecipient = (id: string, flag: boolean) => {
-    // Update flagged status for recipients in both tables
     const updatedTopByAmount = topRecipientsByAmount.map(recipient => 
       recipient.id === id ? { ...recipient, isFlagged: flag } : recipient
     );
@@ -688,7 +684,10 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <TopRecipientsTable 
+              title="Top Recipients by Amount"
+              subtitle="Organizations receiving the largest total funding"
               recipients={topRecipientsByAmount}
+              onFlagRecipient={handleFlagRecipient}
               addToReviewList={addToReviewList}
               reviewListItems={reviewListItems}
               type="amount"
@@ -713,7 +712,10 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <TopRecipientsTable 
+              title="Multiple Program Recipients"
+              subtitle="Organizations potentially exploiting multiple grant programs"
               recipients={topRecipientsByProgramCount}
+              onFlagRecipient={handleFlagRecipient}
               addToReviewList={addToReviewList}
               reviewListItems={reviewListItems}
               type="programCount"
@@ -725,6 +727,8 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 gap-6">
         <DataQualityCard 
           issuesByField={dataQualityIssues}
+          flaggedItemsCount={reviewListItems.length}
+          onReviewList={() => setViewMode("review-list")}
           corporateWelfarePrograms={corporateWelfarePrograms}
           multipleGrantRecipients={multipleGrantRecipients}
         />

@@ -19,12 +19,13 @@ interface Recipient {
 }
 
 interface TopRecipientsTableProps {
-  title: string;
-  subtitle: string;
+  title?: string;
+  subtitle?: string;
   recipients: Recipient[];
   type: 'amount' | 'programCount';
-  onFlagRecipient: (id: string, flag: boolean) => void;
+  onFlagRecipient?: (id: string, flag: boolean) => void;
   addToReviewList: (recipient: Recipient) => void;
+  reviewListItems?: any[]; // Added this missing prop
   flagButtonStyle?: string;
   flaggedButtonStyle?: string;
 }
@@ -36,6 +37,7 @@ const TopRecipientsTable = ({
   type, 
   onFlagRecipient, 
   addToReviewList,
+  reviewListItems = [], // Added with default
   flagButtonStyle = "bg-amber-600 hover:bg-amber-700 text-white",
   flaggedButtonStyle = "bg-green-600 hover:bg-green-700 text-white" 
 }: TopRecipientsTableProps) => {
@@ -47,7 +49,9 @@ const TopRecipientsTable = ({
 
   const handleAddToReview = (recipient: Recipient) => {
     addToReviewList(recipient);
-    onFlagRecipient(recipient.id, true);
+    if (onFlagRecipient) {
+      onFlagRecipient(recipient.id, true);
+    }
     
     toast({
       title: "Recipient Flagged",
@@ -56,7 +60,9 @@ const TopRecipientsTable = ({
   };
 
   const handleRemoveFlag = (recipient: Recipient, id: string) => {
-    onFlagRecipient(id, false);
+    if (onFlagRecipient) {
+      onFlagRecipient(id, false);
+    }
     
     toast({
       title: "Flag Removed",
@@ -64,22 +70,29 @@ const TopRecipientsTable = ({
     });
   };
 
+  // Check if recipient is in review list to determine if it's flagged
+  const isInReviewList = (id: string): boolean => {
+    return reviewListItems.some(item => item.id === id);
+  };
+
   return (
     <Card className="bg-gray-900 border-gray-800">
       <CardHeader>
         <div className="flex items-center">
           <CardTitle className="text-white">{title}</CardTitle>
-          <InfoTooltip 
-            className="ml-2"
-            content={
-              <div>
-                <p className="font-medium mb-1">{title}:</p>
-                <p>{subtitle}</p>
-              </div>
-            }
-          />
+          {subtitle && (
+            <InfoTooltip 
+              className="ml-2"
+              content={
+                <div>
+                  <p className="font-medium mb-1">{title}:</p>
+                  <p>{subtitle}</p>
+                </div>
+              }
+            />
+          )}
         </div>
-        <p className="text-sm text-gray-400">{subtitle}</p>
+        {subtitle && <p className="text-sm text-gray-400">{subtitle}</p>}
       </CardHeader>
       <CardContent>
         <Table>
@@ -125,7 +138,7 @@ const TopRecipientsTable = ({
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  {recipient.isFlagged ? (
+                  {recipient.isFlagged || isInReviewList(recipient.id) ? (
                     <Button 
                       size="sm" 
                       className={flaggedButtonStyle}

@@ -13,12 +13,29 @@ interface DataQualityIssue {
   percentage: number;
 }
 
+// Added interfaces for the new props
+interface MultipleGrantRecipient {
+  recipient: string;
+  count: number;
+}
+
+interface Grant {
+  recipient: string;
+  ministry: string;
+  program: string;
+  amount: number;
+  [key: string]: any;
+}
+
 interface DataQualityCardProps {
   totalRecords?: number;
   issuesCount?: number;
   issuesByField: DataQualityIssue[];
   flaggedItemsCount?: number;
   onReviewList?: () => void;
+  // Add the missing props
+  corporateWelfarePrograms?: Grant[];
+  multipleGrantRecipients?: MultipleGrantRecipient[];
 }
 
 const DataQualityCard = ({ 
@@ -26,7 +43,10 @@ const DataQualityCard = ({
   issuesCount = 318, 
   issuesByField,
   flaggedItemsCount = 0,
-  onReviewList
+  onReviewList,
+  // Include the new props with defaults
+  corporateWelfarePrograms = [],
+  multipleGrantRecipients = []
 }: DataQualityCardProps) => {
   const issuePercentage = (issuesCount / totalRecords) * 100;
   const hasWarning = issuePercentage > 10;
