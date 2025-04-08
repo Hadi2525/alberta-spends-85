@@ -24,7 +24,7 @@ const Index = () => {
               content={
                 <div>
                   <p className="font-medium mb-1">Grants Dashboard:</p>
-                  <p>Welcome to the Grants Management System. This application helps you explore, analyze, and manage government grant data.</p>
+                  <p>Welcome to the Grants Management System. This application helps you explore, analyze, and manage government grant data with a focus on identifying potential corporate welfare, unnecessary programs, and multiple grant exploitation.</p>
                   <p className="mt-1 text-sm text-gray-300">Use the tabs below to navigate between different sections of the application.</p>
                 </div>
               }
@@ -33,7 +33,7 @@ const Index = () => {
           <div className="flex items-center gap-4">
             <Button 
               variant="outline" 
-              className="text-gray-300 border-gray-700 hover:bg-gray-800 hover:text-white"
+              className="text-gray-200 border-gray-700 hover:bg-gray-800 hover:text-white"
             >
               Export
               <InfoTooltip 

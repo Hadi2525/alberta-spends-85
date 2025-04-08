@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { ministryTotals, yearlyTotals, keyMetrics, fiscalYears, ministries, grantsData } from "@/data/grantsData";
 import { useToast } from "@/hooks/use-toast";
 import InfoTooltip from "@/components/ui/InfoTooltip";
-import { AlertTriangle, Flag, Download, PieChartIcon, BarChart3, LineChart as LineChartIcon } from "lucide-react";
+import { AlertTriangle, Flag, Download, PieChartIcon, BarChart3, LineChart as LineChartIcon, PlusCircle, Info } from "lucide-react";
 import DashboardFilters from "@/components/DashboardFilters";
 import TopRecipientsTable from "@/components/TopRecipientsTable";
 import DataQualityCard from "@/components/DataQualityCard";
@@ -58,14 +58,16 @@ const topRecipientsByProgramCount = [
   { id: "20", name: "SAIT", programCount: 3, totalAmount: 2200000, isFlagged: false, riskFactors: [] }
 ];
 
+// Modified to better align with corporate welfare analysis
 const programSpendingData = [
-  { name: "Healthcare Infrastructure", value: 32500000, color: "#4338ca" },
-  { name: "Education Grants", value: 26800000, color: "#6d28d9" },
-  { name: "Municipal Support", value: 19300000, color: "#a21caf" },
-  { name: "Energy Innovation", value: 15700000, color: "#db2777" },
-  { name: "Transportation", value: 12400000, color: "#e11d48" },
-  { name: "Environmental Protection", value: 10800000, color: "#0891b2" },
-  { name: "Other Programs", value: 42500000, color: "#4b5563" }
+  { name: "Healthcare Infrastructure", value: 32500000, color: "#4338ca", riskLevel: "low" },
+  { name: "Education Grants", value: 26800000, color: "#6d28d9", riskLevel: "low" },
+  { name: "Municipal Support", value: 19300000, color: "#a21caf", riskLevel: "low" },
+  { name: "Energy Innovation", value: 15700000, color: "#db2777", riskLevel: "high" },
+  { name: "Transportation", value: 12400000, color: "#e11d48", riskLevel: "medium" },
+  { name: "Environmental Protection", value: 10800000, color: "#0891b2", riskLevel: "low" },
+  { name: "Corporate Development", value: 28500000, color: "#f43f5e", riskLevel: "high" },
+  { name: "Other Programs", value: 14000000, color: "#4b5563", riskLevel: "medium" }
 ];
 
 const spendingTrendsData = [
@@ -256,6 +258,7 @@ const Dashboard = () => {
   };
 
   const handleFlagRecipient = (id: string, flag: boolean) => {
+    // Update flagged status for recipients in both tables
     const updatedTopByAmount = topRecipientsByAmount.map(recipient => 
       recipient.id === id ? { ...recipient, isFlagged: flag } : recipient
     );
@@ -296,8 +299,15 @@ const Dashboard = () => {
     handleFlagRecipient(id, false);
   };
 
+  const handleAddProgramForRiskAssessment = () => {
+    toast({
+      title: "Risk Assessment Process",
+      description: "To add programs for risk assessment, use the Explorer tab to find specific programs and flag them for review.",
+    });
+  };
+
   const flagButtonStyle = "bg-amber-600 hover:bg-amber-700 text-white";
-  const flaggedButtonStyle = "bg-red-600 hover:bg-red-700 text-white";
+  const flaggedButtonStyle = "bg-green-600 hover:bg-green-700 text-white";
 
   const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (!active || !payload || !payload.length) return null;
@@ -332,7 +342,7 @@ const Dashboard = () => {
           <h2 className="text-xl font-bold text-white">Review List</h2>
           <Button 
             variant="outline" 
-            className="text-white border-gray-700 hover:bg-gray-800"
+            className="text-gray-200 border-gray-700 hover:bg-gray-800"
             onClick={() => setViewMode("dashboard")}
           >
             Back to Dashboard
@@ -368,6 +378,30 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="bg-gray-800/40 border border-gray-700 rounded-md p-4 mb-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center">
+            <Info className="h-5 w-5 mr-2 text-amber-500" />
+            <h3 className="text-white font-medium">How to Add Programs for Risk Assessment</h3>
+          </div>
+          <Button
+            variant="outline"
+            className="text-gray-200 border-gray-700 hover:bg-gray-700"
+            onClick={handleAddProgramForRiskAssessment}
+          >
+            <PlusCircle className="mr-2 h-4 w-4" /> Add Program
+          </Button>
+        </div>
+        <p className="text-gray-300 mt-2">
+          Programs and recipients can be flagged for risk assessment in three ways:
+        </p>
+        <ul className="list-disc pl-5 mt-1 text-gray-300 space-y-1">
+          <li>Use the <span className="text-white font-medium">"Flag for Review"</span> buttons in the recipient tables</li>
+          <li>Navigate to the <span className="text-white font-medium">Explorer</span> tab to find and flag specific programs</li>
+          <li>Use the <span className="text-white font-medium">Flagged Items</span> tab to manage items already flagged by the system</li>
+        </ul>
       </div>
 
       <DashboardFilters 
@@ -411,14 +445,14 @@ const Dashboard = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700 flex items-center gap-1"
+                className="bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700 flex items-center gap-1"
                 onClick={() => setViewMode("review-list")}
               >
                 <Flag className="h-4 w-4" /> View Review List ({reviewListItems.length})
               </Button>
               <Button 
                 variant="outline" 
-                className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700 flex items-center"
+                className="bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700 flex items-center"
                 onClick={handleExport}
               >
                 <Download className="mr-2 h-4 w-4" /> Export Data
@@ -671,8 +705,8 @@ const Dashboard = () => {
           type="amount"
           onFlagRecipient={handleFlagRecipient}
           addToReviewList={addToReviewList}
-          flagButtonStyle={flagButtonStyle}
-          flaggedButtonStyle={flaggedButtonStyle}
+          flagButtonStyle="bg-amber-600 hover:bg-amber-700 text-white"
+          flaggedButtonStyle="bg-green-600 hover:bg-green-700 text-white"
         />
         
         <TopRecipientsTable 
@@ -682,8 +716,8 @@ const Dashboard = () => {
           type="programCount"
           onFlagRecipient={handleFlagRecipient}
           addToReviewList={addToReviewList}
-          flagButtonStyle={flagButtonStyle}
-          flaggedButtonStyle={flaggedButtonStyle}
+          flagButtonStyle="bg-amber-600 hover:bg-amber-700 text-white"
+          flaggedButtonStyle="bg-green-600 hover:bg-green-700 text-white"
         />
       </div>
       
@@ -693,6 +727,7 @@ const Dashboard = () => {
           issuesCount={318}
           issuesByField={dataQualityIssues}
           flaggedItemsCount={reviewListItems.length}
+          onReviewList={() => setViewMode("review-list")}
         />
       </div>
     </div>

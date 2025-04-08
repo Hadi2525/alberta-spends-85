@@ -37,7 +37,7 @@ const TopRecipientsTable = ({
   onFlagRecipient, 
   addToReviewList,
   flagButtonStyle = "bg-amber-600 hover:bg-amber-700 text-white",
-  flaggedButtonStyle = "bg-red-600 hover:bg-red-700 text-white" 
+  flaggedButtonStyle = "bg-green-600 hover:bg-green-700 text-white" 
 }: TopRecipientsTableProps) => {
   const { toast } = useToast();
   
@@ -128,7 +128,7 @@ const TopRecipientsTable = ({
                   {recipient.isFlagged ? (
                     <Button 
                       size="sm" 
-                      className="bg-green-600 hover:bg-green-700 text-white"
+                      className={flaggedButtonStyle}
                       onClick={() => handleRemoveFlag(recipient, recipient.id)}
                     >
                       <CheckCircle className="mr-1 h-4 w-4" /> Submitted for Review
