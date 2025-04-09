@@ -8,7 +8,7 @@ const api = axios.create({
 });
 
 export const fetchElements = async (filters = {}) => {
-  const response = await api.post('/api/grants/elements', filters);
+  const response = await api.get('/api/grants/elements');
   return response.data;
 };
 

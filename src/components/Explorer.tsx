@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Flag, Download, Filter, AlertTriangle } from "lucide-react";
-import { grantsData, ministries, fiscalYears, downloadCSV, generateCSV } from "@/data/grantsData";
+import { grantsData, downloadCSV, generateCSV } from "@/data/grantsData";
 import { useToast } from "@/hooks/use-toast";
 import InfoTooltip from "@/components/ui/InfoTooltip";
+import { fetchElements } from "@/services/api";
 
 const Explorer = () => {
   const [filteredData, setFilteredData] = useState(grantsData);
@@ -19,7 +21,38 @@ const Explorer = () => {
   const [amountRange, setAmountRange] = useState([0, 20000000]);
   const [sortBy, setSortBy] = useState("amount");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [ministries, setMinistries] = useState(["ALL MINISTRIES"]);
+  const [fiscalYears, setFiscalYears] = useState(["ALL YEARS"]);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  
+  useEffect(() => {
+    const loadElements = async () => {
+      try {
+        setIsLoading(true);
+        const data = await fetchElements();
+        
+        if (data.ministries) {
+          setMinistries(["ALL MINISTRIES", ...data.ministries]);
+        }
+        
+        if (data.displayFiscalYears) {
+          setFiscalYears(["ALL YEARS", ...data.displayFiscalYears]);
+        }
+      } catch (error) {
+        console.error("Error loading elements:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load filter options. Using default values.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadElements();
+  }, [toast]);
   
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(amount);
@@ -129,11 +162,11 @@ const Explorer = () => {
                   content="Filter grants by the ministry responsible for disbursement"
                 />
               </div>
-              <Select value={selectedMinistry} onValueChange={setSelectedMinistry}>
+              <Select value={selectedMinistry} onValueChange={setSelectedMinistry} disabled={isLoading}>
                 <SelectTrigger className="bg-gray-800 border-gray-700 text-gray-100">
-                  <SelectValue placeholder="Select Ministry" />
+                  <SelectValue placeholder={isLoading ? "Loading..." : "Select Ministry"} />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700 text-gray-100">
+                <SelectContent className="bg-gray-800 border-gray-700 text-gray-100 max-h-[400px]">
                   {ministries.map((ministry) => (
                     <SelectItem key={ministry} value={ministry} className="text-gray-100 hover:bg-gray-700">
                       {ministry}
@@ -151,9 +184,9 @@ const Explorer = () => {
                   content="Filter grants by the government fiscal year when they were issued"
                 />
               </div>
-              <Select value={selectedYear} onValueChange={setSelectedYear}>
+              <Select value={selectedYear} onValueChange={setSelectedYear} disabled={isLoading}>
                 <SelectTrigger className="bg-gray-800 border-gray-700 text-gray-100">
-                  <SelectValue placeholder="Select Year" />
+                  <SelectValue placeholder={isLoading ? "Loading..." : "Select Year"} />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700 text-gray-100">
                   {fiscalYears.map((year) => (

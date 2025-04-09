@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { ministryTotals, yearlyTotals, keyMetrics, fiscalYears, ministries, grantsData } from "@/data/grantsData";
+import { keyMetrics, grantsData } from "@/data/grantsData";
 import { useToast } from "@/hooks/use-toast";
 import InfoTooltip from "@/components/ui/InfoTooltip";
 import { AlertTriangle, Flag, Download, PieChartIcon, BarChart3, LineChart as LineChartIcon, PlusCircle, Info } from "lucide-react";
@@ -15,6 +15,7 @@ import DashboardFilters from "@/components/DashboardFilters";
 import TopRecipientsTable from "@/components/TopRecipientsTable";
 import DataQualityCard from "@/components/DataQualityCard";
 import ReviewList from "@/components/ReviewList";
+import { fetchElements, fetchTrends } from "@/services/api";
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -85,6 +86,12 @@ const Dashboard = () => {
   const [reviewListItems, setReviewListItems] = useState<any[]>([]);
   const [isFilterExpanded, setIsFilterExpanded] = useState(true);
   const [viewMode, setViewMode] = useState("dashboard");
+  const [ministryTotals, setMinistryTotals] = useState([]);
+  const [yearlyTotals, setYearlyTotals] = useState([]);
+  const [ministries, setMinistries] = useState(["ALL MINISTRIES"]);
+  const [fiscalYears, setFiscalYears] = useState(["ALL YEARS"]);
+  const [spendingTrendsData, setSpendingTrendsData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   const [activeFilters, setActiveFilters] = useState({
@@ -94,6 +101,44 @@ const Dashboard = () => {
     businessUnits: ["ALL BUSINESS UNITS"],
     excludeOperational: false
   });
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        
+        const elementsData = await fetchElements();
+        
+        if (elementsData.ministries) {
+          setMinistries(["ALL MINISTRIES", ...elementsData.ministries]);
+        }
+        
+        if (elementsData.displayFiscalYears) {
+          setFiscalYears(["ALL YEARS", ...elementsData.displayFiscalYears]);
+        }
+        
+        const trendsData = await fetchTrends();
+        setSpendingTrendsData(trendsData.map(item => ({
+          year: item.fiscalYear,
+          totalSpending: item.totalAmount,
+          recipientCount: item.recipientCount,
+          averageGrant: item.averageGrantAmount
+        })));
+        
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load dashboard data. Some visualizations may use sample data.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+  }, [toast]);
 
   const corporateWelfarePrograms = grantsData.filter(grant => 
     (grant.recipient.includes("Corp") || grant.recipient.includes("Ltd") || grant.recipient.includes("Inc")) && 
@@ -632,40 +677,47 @@ const Dashboard = () => {
               <div className="h-80">
                 <div className="flex justify-between items-center mb-3">
                   <h3 className="text-lg font-medium text-gray-100">Grant Spending Trends</h3>
+                  {isLoading && <span className="text-gray-400 text-sm">Loading trends data...</span>}
                 </div>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={spendingTrendsData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                    <XAxis dataKey="year" stroke="#aaa" />
-                    <YAxis 
-                      stroke="#aaa"
-                      tickFormatter={(value) => `$${value / 1000000}M`}
-                    />
-                    <YAxis 
-                      yAxisId="right"
-                      orientation="right"
-                      stroke="#d946ef"
-                      tickFormatter={(value) => `${value}`}
-                    />
-                    <Tooltip content={(props) => <CustomTooltip {...props} />} />
-                    <Legend wrapperStyle={{ color: '#fff' }} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="totalSpending" 
-                      name="Total Spending"
-                      stroke="#0ea5e9" 
-                      activeDot={{ r: 8 }} 
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="recipientCount" 
-                      name="Recipient Count"
-                      stroke="#d946ef" 
-                      yAxisId="right"
-                      strokeDasharray="5 5"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                {isLoading ? (
+                  <div className="flex items-center justify-center h-full text-gray-300">
+                    <p>Loading spending trends data...</p>
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={spendingTrendsData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                      <XAxis dataKey="year" stroke="#aaa" />
+                      <YAxis 
+                        stroke="#aaa"
+                        tickFormatter={(value) => `$${value / 1000000}M`}
+                      />
+                      <YAxis 
+                        yAxisId="right"
+                        orientation="right"
+                        stroke="#d946ef"
+                        tickFormatter={(value) => `${value}`}
+                      />
+                      <Tooltip content={(props) => <CustomTooltip {...props} />} />
+                      <Legend wrapperStyle={{ color: '#fff' }} />
+                      <Line 
+                        type="monotone" 
+                        dataKey="totalSpending" 
+                        name="Total Spending"
+                        stroke="#0ea5e9" 
+                        activeDot={{ r: 8 }} 
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="recipientCount" 
+                        name="Recipient Count"
+                        stroke="#d946ef" 
+                        yAxisId="right"
+                        strokeDasharray="5 5"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </TabsContent>
           </Tabs>
