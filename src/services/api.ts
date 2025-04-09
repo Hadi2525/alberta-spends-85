@@ -1,40 +1,92 @@
 
 import axios from 'axios';
 
+// The actual backend API URL
 const API_BASE_URL = 'https://albertaspends.com';
 
+// Create a proxy URL for development (to bypass CORS)
+const createProxyUrl = (url) => {
+  // Using corsproxy.io as a CORS proxy service
+  return `https://corsproxy.io/?${encodeURIComponent(url)}`;
+};
+
+// Configure axios instance
 const api = axios.create({
   baseURL: API_BASE_URL
 });
 
+// Add request interceptor to modify requests with proxy URL if needed
+api.interceptors.request.use((config) => {
+  // Check if we're in development mode
+  if (import.meta.env.DEV) {
+    // Create full URL from baseURL and path
+    const fullUrl = `${API_BASE_URL}${config.url}`;
+    // Update the request to use the proxy URL
+    config.url = createProxyUrl(fullUrl);
+    config.baseURL = ''; // Clear baseURL as the full URL is now in the url property
+  }
+  return config;
+});
+
 export const fetchElements = async (filters = {}) => {
-  const response = await api.get('/api/grants/elements');
-  return response.data;
+  try {
+    const response = await api.get('/api/grants/elements');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching elements:', error);
+    // Return default empty values so the UI can still render
+    return { ministries: [], displayFiscalYears: [], programs: [], businessUnitNames: [] };
+  }
 };
 
 export const fetchProgramsByMinistry = async (filters = {}) => {
-  const response = await api.post('/api/grants/programs', filters);
-  return response.data;
+  try {
+    const response = await api.post('/api/grants/programs', filters);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching programs by ministry:', error);
+    return [];
+  }
 };
 
 export const fetchTopRecipients = async (filters = {}) => {
-  const response = await api.post('/api/grants/top', filters);
-  return response.data;
+  try {
+    const response = await api.post('/api/grants/top', filters);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching top recipients:', error);
+    return [];
+  }
 };
 
 export const fetchGrants = async (filters = {}) => {
-  const response = await api.post('/api/grants', filters);
-  return response.data;
+  try {
+    const response = await api.post('/api/grants', filters);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching grants:', error);
+    return [];
+  }
 };
 
 export const fetchTrends = async (filters = {}) => {
-  const response = await api.post('/api/grants/trends', filters);
-  return response.data.trends;
+  try {
+    const response = await api.post('/api/grants/trends', filters);
+    return response.data.trends;
+  } catch (error) {
+    console.error('Error fetching trends:', error);
+    return [];
+  }
 };
 
 export const fetchDataQuality = async () => {
-  const response = await api.get('/api/grants/data-quality');
-  return response.data;
+  try {
+    const response = await api.get('/api/grants/data-quality');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching data quality:', error);
+    return { score: 0, issues: [] };
+  }
 };
 
 export const fetchMultipleGrantRecipients = async (filters = {}) => {
