@@ -13,10 +13,10 @@ const Index = () => {
   
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card shadow-md">
+      <header className="border-b border-border bg-card shadow-lg">
         <div className="container mx-auto flex justify-between items-center py-4 px-6">
           <div className="flex items-center">
-            <h1 className="text-2xl font-google-sans font-medium text-gradient">
+            <h1 className="text-2xl font-google-sans font-semibold text-gradient">
               Grants Dashboard
             </h1>
             <InfoTooltip 
@@ -33,7 +33,7 @@ const Index = () => {
           <div className="flex items-center gap-4">
             <Button 
               variant="outline" 
-              className="font-google-sans border-border hover:bg-secondary/80"
+              className="font-google-sans border-border hover:bg-muted shadow-sm hover:shadow text-foreground"
             >
               Export
               <InfoTooltip 
@@ -41,7 +41,7 @@ const Index = () => {
                 content="Export all dashboard data as a comprehensive report"
               />
             </Button>
-            <Button className="bg-primary hover:bg-primary/80 text-primary-foreground font-google-sans">
+            <Button className="bg-primary hover:bg-primary/80 text-primary-foreground font-google-sans shadow-md hover:shadow-lg">
               Help
               <InfoTooltip 
                 className="ml-1"
@@ -57,7 +57,7 @@ const Index = () => {
           <TabsList className="mb-6 bg-card border border-border rounded-full p-1 shadow-md">
             <TabsTrigger 
               value="dashboard" 
-              className="font-google-sans rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className="font-google-sans rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground"
             >
               Dashboard
               <InfoTooltip 
@@ -67,7 +67,7 @@ const Index = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="explorer" 
-              className="font-google-sans rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className="font-google-sans rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground"
             >
               Explorer
               <InfoTooltip 
@@ -77,7 +77,7 @@ const Index = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="flagged" 
-              className="font-google-sans rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className="font-google-sans rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground"
             >
               Flagged Items
               <InfoTooltip 
@@ -87,7 +87,7 @@ const Index = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="documentation" 
-              className="font-google-sans rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className="font-google-sans rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground"
             >
               Documentation
               <InfoTooltip 
@@ -97,19 +97,19 @@ const Index = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="dashboard" className="bg-card rounded-lg shadow-md border border-border p-6">
+          <TabsContent value="dashboard" className="bg-card rounded-lg shadow-lg border border-border p-6">
             <Dashboard />
           </TabsContent>
 
-          <TabsContent value="explorer" className="bg-card rounded-lg shadow-md border border-border p-6">
+          <TabsContent value="explorer" className="bg-card rounded-lg shadow-lg border border-border p-6">
             <Explorer />
           </TabsContent>
 
-          <TabsContent value="flagged" className="bg-card rounded-lg shadow-md border border-border p-6">
+          <TabsContent value="flagged" className="bg-card rounded-lg shadow-lg border border-border p-6">
             <FlaggedItems />
           </TabsContent>
 
-          <TabsContent value="documentation" className="bg-card rounded-lg shadow-md border border-border p-6">
+          <TabsContent value="documentation" className="bg-card rounded-lg shadow-lg border border-border p-6">
             <Documentation />
           </TabsContent>
         </Tabs>

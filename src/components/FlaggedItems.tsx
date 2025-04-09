@@ -85,7 +85,7 @@ const FlaggedItems = () => {
     toast({
       title: "Flag Removed",
       description: "This item has been removed from the flagged list.",
-      variant: "default" // Changed from "success" to "default"
+      variant: "default"
     });
   };
 
@@ -102,7 +102,7 @@ const FlaggedItems = () => {
     toast({
       title: action === 'approve' ? "Items Approved" : "Flags Removed",
       description: `${selectedItems.length} items have been ${action === 'approve' ? 'approved' : 'unflagged'}.`,
-      variant: "default" // Changed from "success" to "default"
+      variant: "default"
     });
     
     setSelectedItems([]);
@@ -111,57 +111,58 @@ const FlaggedItems = () => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-card border-border shadow-lg">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <AlertTriangle size={18} className="text-amber-500" /> Flagged Items
+            <CardTitle className="text-foreground flex items-center gap-2">
+              <AlertTriangle size={18} className="text-amber-400" /> Flagged Items
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{flaggedData.length}</div>
-            <p className="text-sm text-gray-400 mt-1">Total grants flagged for review</p>
+            <div className="text-3xl font-bold text-foreground">{flaggedData.length}</div>
+            <p className="text-sm text-muted-foreground mt-1">Total grants flagged for review</p>
           </CardContent>
         </Card>
         
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-card border-border shadow-lg">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Flag size={18} className="text-teal-500" /> Flagging Rate
+            <CardTitle className="text-foreground flex items-center gap-2">
+              <Flag size={18} className="text-teal-400" /> Flagging Rate
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">
+            <div className="text-3xl font-bold text-foreground">
               {((flaggedData.length / grantsData.length) * 100).toFixed(1)}%
             </div>
-            <p className="text-sm text-gray-400 mt-1">Percentage of total grants flagged</p>
+            <p className="text-sm text-muted-foreground mt-1">Percentage of total grants flagged</p>
           </CardContent>
         </Card>
         
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-card border-border shadow-lg">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <AlertTriangle size={18} className="text-amber-500" /> Total Value At Risk
+            <CardTitle className="text-foreground flex items-center gap-2">
+              <AlertTriangle size={18} className="text-amber-400" /> Total Value At Risk
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">
+            <div className="text-3xl font-bold text-foreground">
               {formatCurrency(flaggedData.reduce((sum, item) => sum + item.amount, 0))}
             </div>
-            <p className="text-sm text-gray-400 mt-1">Total value of flagged grants</p>
+            <p className="text-sm text-muted-foreground mt-1">Total value of flagged grants</p>
           </CardContent>
         </Card>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-card border-border shadow-lg">
             <CardHeader className="pb-2">
               <div className="flex flex-wrap justify-between items-center gap-4">
-                <CardTitle className="text-white">Review List</CardTitle>
+                <CardTitle className="text-foreground">Review List</CardTitle>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
-                    className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                    className="border-border text-foreground hover:bg-muted shadow-sm hover:shadow 
+                      font-medium"
                     onClick={() => handleBulkAction('approve')}
                     disabled={selectedItems.length === 0}
                   >
@@ -169,14 +170,15 @@ const FlaggedItems = () => {
                   </Button>
                   <Button
                     variant="outline"
-                    className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                    className="border-border text-foreground hover:bg-muted shadow-sm hover:shadow
+                      font-medium"
                     onClick={() => handleBulkAction('remove')}
                     disabled={selectedItems.length === 0}
                   >
                     <XCircle className="mr-2 h-4 w-4" /> Remove Flags
                   </Button>
                   <Button
-                    className="bg-teal-600 hover:bg-teal-700"
+                    className="bg-teal-600 hover:bg-teal-700 text-white shadow-md hover:shadow-lg"
                     onClick={handleExport}
                   >
                     <Download className="mr-2 h-4 w-4" /> Export
@@ -187,19 +189,19 @@ const FlaggedItems = () => {
             <CardContent>
               <div className="flex mb-4">
                 <div className="relative flex-1">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search flagged items..."
-                    className="pl-9 bg-gray-800 border-gray-700"
+                    className="pl-9 bg-input border-border text-foreground"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
               </div>
               
-              <div className="rounded-md border border-gray-800 overflow-hidden">
+              <div className="rounded-md border border-border overflow-hidden shadow-sm">
                 <Table>
-                  <TableHeader className="bg-gray-800">
+                  <TableHeader className="bg-muted">
                     <TableRow>
                       <TableHead className="w-[50px]">
                         <Checkbox
@@ -207,30 +209,30 @@ const FlaggedItems = () => {
                           onCheckedChange={handleSelectAll}
                         />
                       </TableHead>
-                      <TableHead className="text-gray-400">Ministry</TableHead>
-                      <TableHead className="text-gray-400">Program</TableHead>
-                      <TableHead className="text-gray-400">Recipient</TableHead>
-                      <TableHead className="text-gray-400 text-right">Amount</TableHead>
-                      <TableHead className="text-gray-400">Flag Reason</TableHead>
-                      <TableHead className="text-gray-400 text-right">Actions</TableHead>
+                      <TableHead className="text-foreground">Ministry</TableHead>
+                      <TableHead className="text-foreground">Program</TableHead>
+                      <TableHead className="text-foreground">Recipient</TableHead>
+                      <TableHead className="text-foreground text-right">Amount</TableHead>
+                      <TableHead className="text-foreground">Flag Reason</TableHead>
+                      <TableHead className="text-foreground text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredData.length > 0 ? (
                       filteredData.map((item) => (
-                        <TableRow key={item.id} className="hover:bg-gray-800/60">
+                        <TableRow key={item.id} className="hover:bg-muted/40 border-b border-border">
                           <TableCell>
                             <Checkbox
                               checked={selectedItems.includes(item.id)}
                               onCheckedChange={() => handleSelectItem(item.id)}
                             />
                           </TableCell>
-                          <TableCell className="font-medium">{item.ministry}</TableCell>
-                          <TableCell>{item.program}</TableCell>
-                          <TableCell>{item.recipient}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(item.amount)}</TableCell>
+                          <TableCell className="font-medium text-foreground">{item.ministry}</TableCell>
+                          <TableCell className="text-foreground">{item.program}</TableCell>
+                          <TableCell className="text-foreground">{item.recipient}</TableCell>
+                          <TableCell className="text-right text-foreground">{formatCurrency(item.amount)}</TableCell>
                           <TableCell>
-                            <Badge variant="outline" className="bg-amber-900/20 text-amber-400 border-amber-800">
+                            <Badge variant="outline" className="bg-amber-800/20 text-amber-300 border-amber-700">
                               {item.flagReason || "Potential Anomaly"}
                             </Badge>
                           </TableCell>
@@ -238,7 +240,7 @@ const FlaggedItems = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="hover:bg-red-900/20 hover:text-red-400"
+                              className="hover:bg-red-900/30 text-red-400 hover:text-red-300"
                               onClick={() => handleRemoveFlag(item.id)}
                             >
                               <XCircle className="h-4 w-4" />
@@ -248,7 +250,7 @@ const FlaggedItems = () => {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-6 text-gray-500">
+                        <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
                           No flagged items found matching your search criteria.
                         </TableCell>
                       </TableRow>
@@ -261,27 +263,27 @@ const FlaggedItems = () => {
         </div>
         
         <div>
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-card border-border shadow-lg">
             <CardHeader>
-              <CardTitle className="text-white">Flagging Criteria</CardTitle>
+              <CardTitle className="text-foreground">Flagging Criteria</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {criteria.map((item) => (
-                <div key={item.id} className="flex items-start space-x-3 pb-3 border-b border-gray-800">
+                <div key={item.id} className="flex items-start space-x-3 pb-3 border-b border-border">
                   <Switch
                     checked={item.enabled}
                     onCheckedChange={(checked) => handleCriteriaChange(item.id, checked)}
                   />
                   <div>
-                    <h4 className="font-medium text-white">{item.name}</h4>
-                    <p className="text-sm text-gray-400 mt-1">{item.description}</p>
+                    <h4 className="font-medium text-foreground">{item.name}</h4>
+                    <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
                   </div>
                 </div>
               ))}
 
               <div className="pt-2">
-                <p className="text-sm text-gray-500">
-                  <AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" />
+                <p className="text-sm text-muted-foreground">
+                  <AlertTriangle className="inline h-4 w-4 mr-1 text-amber-400" />
                   Flagging criteria are used to automatically identify potential issues in grant disbursements. Enable or disable criteria as needed.
                 </p>
               </div>

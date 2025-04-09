@@ -52,44 +52,44 @@
   }
 
   .dark {
-    /* Dark theme variables with more contrast */
-    --background: 225 20% 15%; /* Dark purple background */
-    --foreground: 0 0% 98%;
+    /* Dark theme variables with MORE contrast */
+    --background: 230 25% 10%; /* Darker purple background */
+    --foreground: 0 0% 100%; /* Brighter white text */
 
-    --card: 230 25% 12%; /* Slightly lighter than background for cards */
-    --card-foreground: 0 0% 98%;
+    --card: 230 25% 12%; /* Card background slightly lighter than main background */
+    --card-foreground: 0 0% 100%; /* Card text is white */
 
     --popover: 230 25% 12%; 
-    --popover-foreground: 0 0% 98%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 255 70% 75%; /* Bright purple for primary elements */
+    --primary: 255 80% 75%; /* Brighter purple for primary elements */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 225 15% 20%; /* Darker purple for secondary elements */
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 225 20% 25%; /* More saturated secondary elements */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 225 15% 25%;
-    --muted-foreground: 0 0% 70%;
+    --muted: 225 15% 30%;
+    --muted-foreground: 0 0% 80%;
 
-    --accent: 255 70% 75%; /* Same as primary for accent */
-    --accent-foreground: 0 0% 98%;
+    --accent: 255 80% 75%; /* Same as primary for accent */
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 80% 60%; /* Brighter destructive color */
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 225 20% 25%;
-    --input: 225 20% 20%;
-    --ring: 255 70% 75%;
+    --border: 225 20% 30%; /* More visible borders */
+    --input: 225 20% 25%;
+    --ring: 255 80% 75%;
     
     /* Sidebar variables */
     --sidebar-background: 230 30% 10%; /* Darker than main background */
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 255 70% 75%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 255 80% 75%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 225 20% 18%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 225 20% 20%;
-    --sidebar-ring: 255 70% 75%;
+    --sidebar-accent: 225 20% 25%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 225 20% 30%;
+    --sidebar-ring: 255 80% 75%;
   }
 }
 
@@ -121,10 +121,33 @@
   }
 
   .glass-morphism {
-    @apply backdrop-blur-xl bg-white/5 border border-white/10 shadow-lg;
+    @apply backdrop-blur-xl bg-white/10 border border-white/20 shadow-lg;
   }
   
   .text-gradient {
     @apply bg-gradient-to-r from-primary via-accent to-primary/70 bg-clip-text text-transparent;
   }
+
+  /* High-visibility buttons */
+  .high-contrast-button {
+    @apply bg-primary text-white font-medium shadow-md hover:shadow-lg transition-all;
+  }
+  
+  .high-contrast-button-secondary {
+    @apply bg-secondary text-white font-medium border border-white/20 shadow-sm hover:shadow-md transition-all;
+  }
+  
+  .high-contrast-outline {
+    @apply border-2 border-primary/60 text-primary-foreground bg-background/50 hover:bg-primary/10 transition-all;
+  }
+  
+  /* Enhanced table row for better visibility */
+  .visible-table-row {
+    @apply border-b border-gray-700 hover:bg-primary/10;
+  }
+  
+  .visible-table-cell {
+    @apply text-gray-100 py-3;
+  }
 }
+
