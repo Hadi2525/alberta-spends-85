@@ -1,111 +1,36 @@
 
 import axios from 'axios';
 
-// The actual backend API URL
-const API_BASE_URL = 'https://albertaspends.com';
+const BASE_URL = 'https://albertaspends.com/api/grants';
 
-// Create a proxy URL for development (to bypass CORS)
-const createProxyUrl = (url) => {
-  // Using corsproxy.io as a CORS proxy service
-  return `https://corsproxy.io/?${encodeURIComponent(url)}`;
-};
+export interface ElementsResponse {
+  ministries: string[];
+  displayFiscalYears: string[];
+}
 
-// Configure axios instance
-const api = axios.create({
-  baseURL: API_BASE_URL
-});
+export interface TrendsData {
+  fiscalYear: string;
+  totalAmount: number;
+  recipientCount: number;
+  averageGrantAmount: number;
+}
 
-// Add request interceptor to modify requests with proxy URL if needed
-api.interceptors.request.use((config) => {
-  // Check if we're in development mode
-  if (import.meta.env.DEV) {
-    // Create full URL from baseURL and path
-    const fullUrl = `${API_BASE_URL}${config.url}`;
-    // Update the request to use the proxy URL
-    config.url = createProxyUrl(fullUrl);
-    config.baseURL = ''; // Clear baseURL as the full URL is now in the url property
-  }
-  return config;
-});
-
-export const fetchElements = async (filters = {}) => {
+export const fetchElements = async (): Promise<ElementsResponse> => {
   try {
-    const response = await api.get('/api/grants/elements');
+    const response = await axios.get(`${BASE_URL}/elements`);
     return response.data;
   } catch (error) {
     console.error('Error fetching elements:', error);
-    // Return default empty values so the UI can still render
-    return { ministries: [], displayFiscalYears: [], programs: [], businessUnitNames: [] };
+    throw error;
   }
 };
 
-export const fetchProgramsByMinistry = async (filters = {}) => {
+export const fetchTrends = async (): Promise<TrendsData[]> => {
   try {
-    const response = await api.post('/api/grants/programs', filters);
+    const response = await axios.post(`${BASE_URL}/trends`, {});
     return response.data;
-  } catch (error) {
-    console.error('Error fetching programs by ministry:', error);
-    return [];
-  }
-};
-
-export const fetchTopRecipients = async (filters = {}) => {
-  try {
-    const response = await api.post('/api/grants/top', filters);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching top recipients:', error);
-    return [];
-  }
-};
-
-export const fetchGrants = async (filters = {}) => {
-  try {
-    const response = await api.post('/api/grants', filters);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching grants:', error);
-    return [];
-  }
-};
-
-export const fetchTrends = async (filters = {}) => {
-  try {
-    const response = await api.post('/api/grants/trends', filters);
-    return response.data.trends;
   } catch (error) {
     console.error('Error fetching trends:', error);
-    return [];
+    throw error;
   }
 };
-
-export const fetchDataQuality = async () => {
-  try {
-    const response = await api.get('/api/grants/data-quality');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching data quality:', error);
-    return { score: 0, issues: [] };
-  }
-};
-
-export const fetchMultipleGrantRecipients = async (filters = {}) => {
-  // This would be a real API call in production
-  // For now, we're returning mock data that shows organizations receiving grants from multiple programs
-  const mockData = [
-    { recipient: "University of Alberta", count: 8, totalAmount: 18500000 },
-    { recipient: "University of Calgary", count: 6, totalAmount: 8500000 },
-    { recipient: "City of Calgary", count: 5, totalAmount: 12400000 },
-    { recipient: "Alberta Innovates", count: 4, totalAmount: 5900000 },
-    { recipient: "Athabasca University", count: 4, totalAmount: 3200000 },
-    { recipient: "City of Edmonton", count: 4, totalAmount: 4800000 },
-    { recipient: "NAIT", count: 3, totalAmount: 2700000 },
-    { recipient: "Alberta Health Services", count: 3, totalAmount: 25000000 },
-    { recipient: "ATCO Group", count: 3, totalAmount: 9200000 },
-    { recipient: "SAIT", count: 3, totalAmount: 2200000 }
-  ];
-  
-  return mockData;
-};
-
-export default api;
