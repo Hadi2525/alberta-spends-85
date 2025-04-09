@@ -67,14 +67,16 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Google's color palette
-				'google-blue': '#4285F4',
+				// Dark theme color palette
+				'google-blue': '#9b87f5',     // Changed to purple for dark theme
 				'google-red': '#EA4335',
 				'google-yellow': '#FBBC05',
 				'google-green': '#34A853',
-				'google-gray': '#5F6368',
-				'google-light-gray': '#F8F9FA',
-				'google-border-gray': '#DADCE0',
+				'google-gray': '#aaadb0',     // Lighter gray for dark theme
+				'google-light-gray': '#1A1F2C', // Dark purple background
+				'google-border-gray': '#403E43', // Darker charcoal for borders
+				'dark-charcoal': '#221F26',
+				'dark-gray': '#222222',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

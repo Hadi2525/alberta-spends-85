@@ -5,6 +5,7 @@
 
 @layer base {
   :root {
+    /* Light mode variables kept for reference */
     --background: 0 0% 100%;
     --foreground: 0 0% 20%;
 
@@ -45,43 +46,50 @@
     --sidebar-ring: 224 71% 45%;
   }
 
+  /* Default to dark theme */
+  html {
+    @apply dark;
+  }
+
   .dark {
-    --background: 0 0% 7%;
+    /* Dark theme variables with more contrast */
+    --background: 225 20% 15%; /* Dark purple background */
     --foreground: 0 0% 98%;
 
-    --card: 0 0% 7%;
+    --card: 230 25% 12%; /* Slightly lighter than background for cards */
     --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 7%;
+    --popover: 230 25% 12%; 
     --popover-foreground: 0 0% 98%;
 
-    --primary: 217 89% 61%;
+    --primary: 255 70% 75%; /* Bright purple for primary elements */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 11%;
+    --secondary: 225 15% 20%; /* Darker purple for secondary elements */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 11%;
-    --muted-foreground: 0 0% 63%;
+    --muted: 225 15% 25%;
+    --muted-foreground: 0 0% 70%;
 
-    --accent: 0 0% 11%;
+    --accent: 255 70% 75%; /* Same as primary for accent */
     --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 11%;
-    --input: 0 0% 11%;
-    --ring: 217 89% 61%;
+    --border: 225 20% 25%;
+    --input: 225 20% 20%;
+    --ring: 255 70% 75%;
     
-    --sidebar-background: 0 0% 11%;
+    /* Sidebar variables */
+    --sidebar-background: 230 30% 10%; /* Darker than main background */
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 217 89% 61%;
+    --sidebar-primary: 255 70% 75%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent: 225 20% 18%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 217 89% 61%;
+    --sidebar-border: 225 20% 20%;
+    --sidebar-ring: 255 70% 75%;
   }
 }
 
@@ -101,14 +109,22 @@
 
 @layer components {
   .google-card {
-    @apply bg-white border border-google-border-gray rounded-lg shadow-sm;
+    @apply bg-card border border-border rounded-lg shadow-md;
   }
   
   .google-button-primary {
-    @apply bg-google-blue text-white rounded-md px-4 py-2 font-medium hover:shadow-md transition-shadow;
+    @apply bg-primary text-primary-foreground rounded-md px-4 py-2 font-medium hover:bg-primary/80 transition-all hover:shadow-md;
   }
   
   .google-button-secondary {
-    @apply bg-white text-google-gray border border-google-border-gray rounded-md px-4 py-2 font-medium hover:shadow-sm transition-shadow;
+    @apply bg-secondary text-secondary-foreground border border-border rounded-md px-4 py-2 font-medium hover:bg-secondary/80 transition-all hover:shadow-sm;
+  }
+
+  .glass-morphism {
+    @apply backdrop-blur-xl bg-white/5 border border-white/10 shadow-lg;
+  }
+  
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary via-accent to-primary/70 bg-clip-text text-transparent;
   }
 }
