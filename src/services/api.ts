@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 
-const API_BASE_URL = 'https://albertaspends-com.onrender.com';
+const API_BASE_URL = 'https://albertaspends.com';
 
 const api = axios.create({
   baseURL: API_BASE_URL
@@ -29,7 +29,7 @@ export const fetchGrants = async (filters = {}) => {
 
 export const fetchTrends = async (filters = {}) => {
   const response = await api.post('/api/grants/trends', filters);
-  return response.data;
+  return response.data.trends;
 };
 
 export const fetchDataQuality = async () => {
