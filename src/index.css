@@ -52,44 +52,45 @@
   }
 
   .dark {
-    /* Dark theme variables with MORE contrast */
-    --background: 230 25% 10%; /* Darker purple background */
-    --foreground: 0 0% 100%; /* Brighter white text */
+    /* Deep navy blue background color from the image */
+    --background: 220 35% 10%; /* Dark navy blue */
+    --foreground: 0 0% 100%; /* White text */
 
-    --card: 230 25% 12%; /* Card background slightly lighter than main background */
-    --card-foreground: 0 0% 100%; /* Card text is white */
+    --card: 220 35% 13%; /* Slightly lighter navy for cards */
+    --card-foreground: 0 0% 100%;
 
-    --popover: 230 25% 12%; 
+    --popover: 220 35% 13%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 255 80% 75%; /* Brighter purple for primary elements */
+    /* Teal accent color from image */
+    --primary: 160 100% 45%; /* Bright teal */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 225 20% 25%; /* More saturated secondary elements */
+    --secondary: 220 35% 20%; /* Lighter navy for secondary elements */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 225 15% 30%;
+    --muted: 220 35% 25%;
     --muted-foreground: 0 0% 80%;
 
-    --accent: 255 80% 75%; /* Same as primary for accent */
+    --accent: 160 100% 45%; /* Same as primary for accent */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 80% 60%; /* Brighter destructive color */
+    --destructive: 0 80% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 225 20% 30%; /* More visible borders */
-    --input: 225 20% 25%;
-    --ring: 255 80% 75%;
+    --border: 220 35% 25%;
+    --input: 220 35% 15%;
+    --ring: 160 100% 45%;
     
     /* Sidebar variables */
-    --sidebar-background: 230 30% 10%; /* Darker than main background */
+    --sidebar-background: 220 35% 8%; /* Darker than main background */
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 255 80% 75%;
+    --sidebar-primary: 160 100% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 225 20% 25%;
+    --sidebar-accent: 220 35% 20%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 225 20% 30%;
-    --sidebar-ring: 255 80% 75%;
+    --sidebar-border: 220 35% 25%;
+    --sidebar-ring: 160 100% 45%;
   }
 }
 
@@ -150,4 +151,3 @@
     @apply text-gray-100 py-3;
   }
 }
-

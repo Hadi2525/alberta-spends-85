@@ -12,12 +12,12 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card shadow-lg">
+    <div className="min-h-screen bluebooks-bg bg-bluebooks-navy">
+      <header className="border-b border-bluebooks-border">
         <div className="container mx-auto flex justify-between items-center py-4 px-6">
           <div className="flex items-center">
-            <h1 className="text-2xl font-google-sans font-semibold text-gradient">
-              Grants Dashboard
+            <h1 className="text-2xl font-google-sans font-semibold text-white">
+              Bluebooks
             </h1>
             <InfoTooltip 
               className="ml-2"
@@ -33,7 +33,7 @@ const Index = () => {
           <div className="flex items-center gap-4">
             <Button 
               variant="outline" 
-              className="font-google-sans border-border hover:bg-muted shadow-sm hover:shadow text-foreground"
+              className="font-google-sans border-bluebooks-border hover:bg-bluebooks-navy-light text-white"
             >
               Export
               <InfoTooltip 
@@ -41,7 +41,7 @@ const Index = () => {
                 content="Export all dashboard data as a comprehensive report"
               />
             </Button>
-            <Button className="bg-primary hover:bg-primary/80 text-primary-foreground font-google-sans shadow-md hover:shadow-lg">
+            <Button className="bg-bluebooks-teal hover:bg-bluebooks-teal/80 text-bluebooks-navy font-google-sans font-semibold">
               Help
               <InfoTooltip 
                 className="ml-1"
@@ -54,10 +54,10 @@ const Index = () => {
 
       <div className="container mx-auto p-6">
         <Tabs defaultValue="dashboard" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-6 bg-card border border-border rounded-full p-1 shadow-md">
+          <TabsList className="mb-6 bg-bluebooks-navy-light border border-bluebooks-border rounded-none p-0 shadow-none gap-4 flex">
             <TabsTrigger 
               value="dashboard" 
-              className="font-google-sans rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground"
+              className="bluebooks-tab rounded-none px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-bluebooks-teal"
             >
               Dashboard
               <InfoTooltip 
@@ -67,7 +67,7 @@ const Index = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="explorer" 
-              className="font-google-sans rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground"
+              className="bluebooks-tab rounded-none px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-bluebooks-teal"
             >
               Explorer
               <InfoTooltip 
@@ -77,7 +77,7 @@ const Index = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="flagged" 
-              className="font-google-sans rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground"
+              className="bluebooks-tab rounded-none px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-bluebooks-teal"
             >
               Flagged Items
               <InfoTooltip 
@@ -87,7 +87,7 @@ const Index = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="documentation" 
-              className="font-google-sans rounded-full px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground"
+              className="bluebooks-tab rounded-none px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-bluebooks-teal"
             >
               Documentation
               <InfoTooltip 
@@ -97,19 +97,19 @@ const Index = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="dashboard" className="bg-card rounded-lg shadow-lg border border-border p-6">
+          <TabsContent value="dashboard" className="bluebooks-card p-6">
             <Dashboard />
           </TabsContent>
 
-          <TabsContent value="explorer" className="bg-card rounded-lg shadow-lg border border-border p-6">
+          <TabsContent value="explorer" className="bluebooks-card p-6">
             <Explorer />
           </TabsContent>
 
-          <TabsContent value="flagged" className="bg-card rounded-lg shadow-lg border border-border p-6">
+          <TabsContent value="flagged" className="bluebooks-card p-6">
             <FlaggedItems />
           </TabsContent>
 
-          <TabsContent value="documentation" className="bg-card rounded-lg shadow-lg border border-border p-6">
+          <TabsContent value="documentation" className="bluebooks-card p-6">
             <Documentation />
           </TabsContent>
         </Tabs>

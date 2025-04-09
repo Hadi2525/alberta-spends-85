@@ -6,28 +6,28 @@
   text-align: center;
 }
 
-/* Google-style Material Design elevation shadows for dark theme with better contrast */
+/* Elevation shadows for dark navy theme */
 .google-elevation-1 {
-  box-shadow: 0 1px 5px 0 rgba(0,0,0,0.5), 0 2px 5px 0 rgba(0,0,0,0.4);
+  box-shadow: 0 1px 5px 0 rgba(0,0,0,0.6), 0 2px 5px 0 rgba(0,0,0,0.5);
 }
 
 .google-elevation-2 {
-  box-shadow: 0 3px 8px 0 rgba(0,0,0,0.5), 0 4px 10px 0 rgba(0,0,0,0.4);
+  box-shadow: 0 3px 8px 0 rgba(0,0,0,0.6), 0 4px 10px 0 rgba(0,0,0,0.5);
 }
 
 .google-elevation-3 {
-  box-shadow: 0 5px 12px 0 rgba(0,0,0,0.5), 0 8px 15px 0 rgba(0,0,0,0.4);
+  box-shadow: 0 5px 12px 0 rgba(0,0,0,0.6), 0 8px 15px 0 rgba(0,0,0,0.5);
 }
 
-/* Google-style cards for dark theme with improved visibility */
+/* Cards for dark navy theme */
 .google-card {
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   background-color: hsl(var(--card));
   overflow: hidden;
 }
 
-/* Google-style buttons for dark theme with better contrast */
+/* Buttons for dark navy theme */
 .google-button {
   font-family: "Google Sans", sans-serif;
   font-weight: 500;
@@ -49,13 +49,13 @@
 .google-button-white {
   background-color: hsl(var(--secondary));
   color: hsl(var(--secondary-foreground));
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-/* Google-style inputs for dark theme with better visibility */
+/* Inputs for dark navy theme */
 .google-input {
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   padding: 8px 12px;
   font-family: Roboto, sans-serif;
@@ -66,7 +66,7 @@
 .google-input:focus {
   outline: none;
   border-color: hsl(var(--primary));
-  box-shadow: 0 0 0 2px rgba(155, 135, 245, 0.25);
+  box-shadow: 0 0 0 2px rgba(0, 255, 200, 0.25);
 }
 
 /* Animation for components */
@@ -110,7 +110,7 @@
   font-weight: 500;
   border-radius: 4px;
   padding: 8px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -123,3 +123,42 @@
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* Bluebooks specific styling */
+.bluebooks-bg {
+  background-color: hsl(220, 35%, 10%); /* Deep navy blue from image */
+}
+
+.bluebooks-card {
+  background-color: hsl(220, 35%, 13%); /* Slightly lighter navy blue */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+}
+
+.bluebooks-teal {
+  color: hsl(160, 100%, 45%); /* Bright teal from image */
+}
+
+.bluebooks-heading {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.bluebooks-value {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: hsl(160, 100%, 45%); /* Bright teal */
+}
+
+.bluebooks-tab {
+  color: white;
+  border-bottom: 3px solid transparent;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.bluebooks-tab.active {
+  border-bottom-color: hsl(160, 100%, 45%); /* Bright teal */
+}
